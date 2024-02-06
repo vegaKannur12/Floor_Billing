@@ -1,6 +1,8 @@
 import 'dart:io';
-import 'package:floor_billing/SCREENs/home.dart';
+import 'package:floor_billing/SCREENs/HOME/homeFloorBilling.dart';
+import 'package:floor_billing/SCREENs/db_selection.dart';
 import 'package:floor_billing/SCREENs/splashscreen.dart';
+import 'package:floor_billing/authentication/login.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,7 +99,8 @@ class MyApp extends StatelessWidget {
           // SplashScreen(),
           // LoginPage(),
           // Registration(),
-           HomePage(),
+          // const HomeFloorBill(),
+           DBSelection()
           // CartBag(),
           // MyTextFieldScreen(),
     );

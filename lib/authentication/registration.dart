@@ -219,7 +219,7 @@ class _RegistrationState extends State<Registration> {
                       children: [
                       ElevatedButton(
                         onPressed: ()async {
-                          String deviceInfo =
+                           String deviceInfo =
                                       "$manufacturer" + '' + "$model";
                                   if (_formKey.currentState!.validate()) {
                                     String tempFp1 =

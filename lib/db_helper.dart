@@ -1,6 +1,6 @@
 
 import 'package:path/path.dart';
-import 'package:floor_billing/model/registration_model.dart';
+import 'package:floor_billing/MODEL/registration_model.dart';
 
 import 'package:sqflite/sqflite.dart';
 
@@ -52,82 +52,18 @@ class BILLING {
             msg TEXT
           )
           ''');
-/////////////////////order bag//////////////////////////////////////////////
-    // await db.execute('''
-    //       CREATE TABLE orderBagTable (
-    //         id INTEGER PRIMARY KEY AUTOINCREMENT,
-    //         itemName TEXT NOT NULL,
-    //         catId TEXT NOT NULL,
-    //         cartDate TEXT,
-    //         cartTime TEXT,
-    //         os TEXT NOT NULL,
-    //         customerId TEXT,
-    //         cartRowno INTEGER,
-    //         code TEXT,
-    //         qty REAL,
-    //         rate TEXT,
-    //         totalAmount TEXT,
-    //         pid INTEGER,
-    //         unitName TEXT,
-    //         package REAL,
-    //         baseRate REAL,
-    //         cStatus INTEGER
-    //       )
-    //       ''');
-/////////////////////order master///////////////////////////////////////////
-    await db.execute('''
-          CREATE TABLE orderMasterTable (
+           await db.execute('''
+          CREATE TABLE custDetailsTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            orderId INTEGER,
-            orderDate TEXT,
-            orderTime TEXT,
-            catId TEXT NOT NULL,
-            os TEXT NOT NULL,
-            customerId TEXT,
-            userId TEXT,
-            areaId TEXT,
-            status INTEGER,
-            totalPrice REAL
+            cardnum TEXT NOT NULL,
+            custname TEXT NOT NULL,
+            contact TEXT NOT NULL,
+            billid TEXT NOT NULL
           )
           ''');
-////////////////////////////order detail//////////////////////////////////////////////
-    await db.execute('''
-          CREATE TABLE orderDetailTable (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            item TEXT,
-            os TEXT NOT NULL,
-            orderId INTEGER,
-            rowNum INTEGER,
-            code TEXT,
-            qty INTEGER,
-            unit TEXT,
-            rate REAL,
-            packing TEXT,
-            baseRate REAL  
-          )
-          ''');
-          await db.execute('''
-          CREATE TABLE orderBagtable (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,       
-            tableId INTEGER,
-            catId INTEGER,
-            pname TEXT,
-            rate REAL,
-            qty INTEGER        
-          )
-          ''');
+
   }
 
-
-
- Future insertorderBagTab(String tableId,Map data,double qty) async {
-    final db = await database;
-    var query ='INSERT INTO orderBagtable(tableId,catId,pname,rate,qty) VALUES("$tableId", "${data["catid"]}" , "${data["pname"]}", "${data["rate"]}","$qty")';
-    var res = await db.rawInsert(query);
-    print(query);
-    print("inserted to bag  ----$res");
-    return res;
-  }
 
 /////////////////////////////////////////////////////////////////////////
   Future insertRegistrationDetails(RegistrationData data) async {
@@ -175,94 +111,6 @@ class BILLING {
     return res;
   }
 
-  ///////////////////////////////////////////////////////////////////////////
-  getMaxCommonQuery(String table, String field, String? condition) async {
-    var res;
-    int max;
-    Database db = await instance.database;
-    var result = await db.rawQuery("SELECT * FROM '$table'");
-    if (result.isNotEmpty) {
-      var query = "SELECT MAX($field) max_val FROM '$table'";
-      res = await db.rawQuery(query);
-      max = res[0]["max_val"] + 1;
-    } else {
-      max = 1;
-    }
-    return max;
-  }
-
-  //////////////////////////////////////////////////////////////////////
-  Future insertorderBagTable(
-    String itemName,
-    String catId,
-    String cartdate,
-    String carttime,
-    String os,
-    String customerid,
-    int cartrowno,
-    String code,
-    double qty,
-    double rate,
-    double totalamount,
-    int pid,
-    String unit_name,
-    String packagenm,
-    double baseRate,
-    int cstatus,
-  ) async {
-    print("qty--$qty");
-    print("unit_name........$customerid...$unit_name");
-    final db = await database;
-
-    var query2 =
-        'INSERT INTO orderBagTable (itemName,catId, cartDate, cartTime , os, customerId, cartRowno, code, qty, rate, totalAmount, pid, unitName, package, baseRate, cStatus) VALUES ("${itemName}","${catId}","${cartdate}","${carttime}", "${os}", "${customerid}", $cartrowno, "${code}", $qty, $rate, $totalamount,  $pid, "$unit_name", "$packagenm", $baseRate, $cstatus)';
-    var res = await db.rawInsert(query2);
-
-    // ignore: avoid_print
-    print("insert query result $res");
-
-    return res;
-  }
-
-  //////////////////////////////////////////////////////////
-  Future insertorderMasterandDetailsTable(
-    String item,
-    int order_id,
-    double? qty,
-    double rate,
-    String? code,
-    String orderdate,
-    String ordertime,
-    String os,
-    String customerid,
-    String userid,
-    String areaid,
-    int status,
-    String? unit,
-    int rowNum,
-    String table,
-    double total_price,
-    double? packing,
-    double? base_rate,
-  ) async {
-    final db = await database;
-    var res2;
-
-    if (table == "orderDetailTable") {
-      var query2 =
-          'INSERT INTO orderDetailTable(orderId, rowNum,os,code, item, qty, rate, unit, packing, baseRate) VALUES(${order_id},${rowNum},"${os}","${code}","${item}", ${qty}, $rate, "${unit}", $packing, $base_rate)';
-      // ignore: avoid_print
-      print(query2);
-      res2 = await db.rawInsert(query2);
-    } else if (table == "orderMasterTable") {
-      var query3 =
-          'INSERT INTO orderMasterTable(orderId, orderDate, orderTime, os, customerId, userId, areaId, status, totalPrice) VALUES("${order_id}", "${orderdate}", "${ordertime}", "${os}", "${customerid}", "${userid}", "${areaid}", ${status},${total_price})';
-      res2 = await db.rawInsert(query3);
-      // ignore: avoid_print
-      print(query3);
-    }
-  }
-
   /////////////////////////////////////////////////////////////
   getListOfTables() async {
     Database db = await instance.database;
@@ -281,11 +129,7 @@ class BILLING {
     var list = await db.rawQuery('SELECT * FROM $tablename');
     print(list);
     return list;
-    // list.map((e) => print(e["name"])).toList();
-    // return list;
-    // list.forEach((row) {
-    //   print(row.values);
-    // });
+   
   }
 
   ///////////////////////////................................///////////////////////////////////////

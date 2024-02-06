@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:floor_billing/SCREENs/db_selection.dart';
-import 'package:floor_billing/SCREENs/home.dart';
-import 'package:floor_billing/model/registration_model.dart';
+import 'package:floor_billing/SCREENs/HOME/homeFloorBilling.dart';
+import 'package:floor_billing/MODEL/registration_model.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/components/external_dir.dart';
 import 'package:floor_billing/db_helper.dart';
-import 'package:floor_billing/model/customer_model.dart';
+import 'package:floor_billing/MODEL/customer_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
 import '../components/network_connectivity.dart';
@@ -19,59 +19,33 @@ class Controller extends ChangeNotifier {
   // int? cartNo;
   String? fromDate;
   String? lastdate;
-  String? customerId;
-  double bal = 0.0;
-  int? cartCount;
   String? cname;
-  double sum = 0.0;
-  bool isSearch = false;
-  String? colorString;
-  // List<CD> cD = [];
-  List<Map<String, dynamic>> customerList = [];
-  List<Map<String, dynamic>> filteredlist = [];
-  List<Map<String, dynamic>> orderlist = [];
-  List<Map<String, dynamic>> orderDetails = [];
-  bool isOrderLoading = false;
-  bool isfreez = false;
-  List<Map<String, dynamic>> cartItems = [];
-  bool isCartLoading = false;
-  List<Map<String, dynamic>> categoryList = [];
-  List<Map<String, dynamic>> itemlist = [];
 
-  bool isCusLoading = false;
+  bool isSearch = false;
   DateTime? sdate;
   DateTime? ldate;
   String? os;
   String? cName;
-  List<Widget> calendarWidget = [];
-  List<int> response = [];
   String? fp;
   String? cid;
   ExternalDir externalDir = ExternalDir();
   List<CD> c_d = [];
   String? sof;
-  String? branchname;
-  String? selected;
+
   // ignore: prefer_typing_uninitialized_variables
   var jsonEncoded;
-  String poptitle = "";
-  bool isDbNameLoading = false;
-  String? dashDate;
   DateTime d = DateTime.now();
   String? todate;
 
   bool isLoading = false;
-  bool isReportLoading = false;
-
   String? appType;
   bool isdbLoading = true;
 
   // List<Map<String, dynamic>> filteredList = [];
-  var result1 = <String, List<Map<String, dynamic>>>{};
-  var resultList = <String, List<Map<String, dynamic>>>{};
+
   List<TextEditingController> qty = [];
   List<bool> isAdded = [];
-  List<Map<String, dynamic>> list = [];
+
   List<Map<String, dynamic>> tabllist = [
     {"tab": "Table 1", "tid": 1},
     {"tab": "Table 2", "tid": 2},
@@ -88,13 +62,11 @@ class Controller extends ChangeNotifier {
     {"catid": "C6", "catname": "Category6"},
     {"catid": "C7", "catname": "Category7"},
   ];
-  
-  List<Map<String, dynamic>> myBagList = [];
-  bool showBottombar = true;
+
   double itemcount = 0.0;
 
   String? userName;
-  String param = "";
+
   List<Map<String, dynamic>> db_list = [];
   bool isYearSelectLoading = false;
   bool isLoginLoading = false;
@@ -102,18 +74,16 @@ class Controller extends ChangeNotifier {
   bool isTableLoading = false;
   bool isCategoryLoading = false;
   bool isItemLoading = false;
-  String? tablID = "";
+
   String? catlID = "";
   Timer timer = Timer.periodic(Duration(seconds: 3), (timer) {});
-  // qtyadd() {
-  //   qty = List.generate(itemlist.length, (index) => TextEditingController());
-  //   isAdded = List.generate(itemlist.length, (index) => false);
-  //   notifyListeners();
-  //   for (int i = 0; i < itemlist.length; i++) {
-  //     qty[i].text = "1.0";
-  //   }
-  // }
 
+  String u_id = "";
+  String card_id = "";
+  String disply_name = "";
+  List custDetailsList = [];
+  String cus_name = "";
+  String cus_contact = "";
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -262,16 +232,21 @@ class Controller extends ChangeNotifier {
       var valueMap = json.decode(res);
       print("item list----------$res");
       if (valueMap != null) {
-        print("item list----------$res");
-        print("smId.............>${valueMap[0]["Sm_id"]}");
-        prefs.setString("Sm_id", valueMap[0]["Sm_id"].toString());
+        print("user dataa----------$res");
+        print(
+            "UserID >>>>>> ${valueMap[0]["UserID"]}----Displynam>>>>> ${valueMap[0]["Flt_Display_Name"]}");
+        prefs.setString("UserID", valueMap[0]["UserID"].toString());
+        prefs.setString(
+            "Flt_Display_Name", valueMap[0]["Flt_Display_Name"].toString());
         prefs.setString("st_uname", userName);
         prefs.setString("st_pwd", password);
-       
+        getSalesman();
+        setUID();
+
         Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
+          context,
+          MaterialPageRoute(builder: (context) => HomeFloorBill()),
+        );
       } else {
         CustomSnackbar snackbar = CustomSnackbar();
         snackbar.showSnackbar(context, "Incorrect Username or Password", "");
@@ -286,6 +261,25 @@ class Controller extends ChangeNotifier {
       print(e);
       return null;
     }
+  }
+
+  setUID() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    u_id = prefs.getString("UserID")!;
+    disply_name = prefs.getString("Flt_Display_Name")!;
+    notifyListeners();
+  }
+
+  getSalesman() async {
+    var res = await SqlConn.readData("Flt_Sp_Get_Sm_List '$os'");
+    var map = jsonDecode(res);
+    print("Salesman Map--$map");
+  }
+
+  getItemDetails() async {
+    var res = await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os',");
+    var map = jsonDecode(res);
+    print("Item details Map--$map");
   }
 
   ////////////////////////////////////////////////////////
@@ -320,7 +314,7 @@ class Controller extends ChangeNotifier {
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => HomeFloorBill()),
       );
     }
   }
@@ -330,7 +324,6 @@ class Controller extends ChangeNotifier {
     BuildContext context,
     String type,
   ) async {
-   
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? ip = prefs.getString("ip");
     String? port = prefs.getString("port");
@@ -340,8 +333,9 @@ class Controller extends ChangeNotifier {
     String? multi_db = prefs.getString("multi_db");
 
     debugPrint("Connecting selected DB...$db----");
-    try { isYearSelectLoading=true;
-    notifyListeners();
+    try {
+      isYearSelectLoading = true;
+      notifyListeners();
       // await SqlConn.disconnect();
       showDialog(
         context: context,
@@ -384,13 +378,12 @@ class Controller extends ChangeNotifier {
       // yr = prefs.getString("yr_name");
       // dbn = prefs.getString("db_name");
       cName = prefs.getString("cname");
-       isYearSelectLoading=false;
-    notifyListeners();
+      isYearSelectLoading = false;
+      notifyListeners();
       // prefs.setString("db_name", dbn.toString());
       // prefs.setString("yr_name", yrnam.toString());
       // getDbName();
       // getBranches(context);
-      
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -406,7 +399,7 @@ class Controller extends ChangeNotifier {
     String? port = prefs.getString("port");
     String? un = prefs.getString("usern");
     String? pw = prefs.getString("pass_w");
-    debugPrint("Connecting...");
+    debugPrint("Connecting..initdb.");
     try {
       showDialog(
         context: context,
@@ -445,7 +438,61 @@ class Controller extends ChangeNotifier {
     }
   }
 
+///////////////////////.................////////////////////////////////
+  disconnectDB(BuildContext context) async {
+    debugPrint("Disconnecting...!!!");
+    try {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Please wait",
+                  style: TextStyle(fontSize: 13),
+                ),
+                SpinKitCircle(
+                  color: Colors.green,
+                )
+              ],
+            ),
+          );
+        },
+      );
+      await SqlConn.disconnect();
+      debugPrint("DisConnected----------!!!!!!!!!!!!!!");
+    } catch (e) {
+      debugPrint("Disconnection error--->>>${e.toString()}");
+    } finally {
+      Navigator.pop(context);
+    }
+  }
+
+//////////////////////................/////////////////////////
+  getCustData(String cardNo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("cardNo", cardNo);
+    print('os ----- $os, cardNo ------->$cardNo');
+    var res = await SqlConn.readData("Flt_Sp_GetFloor_Cards '$os','$cardNo'");
+    var map = jsonDecode(res);
+    print("custdata------------>>$res");
+
+    custDetailsList.clear();
+    for (var item in map) {
+      custDetailsList.add(item);
+    }
+    print("customer Data List ==$custDetailsList");
+    prefs.setInt("CardID", custDetailsList[0]['CardID']);
+    card_id = custDetailsList[0]['CardID'].toString();
+    cus_name = custDetailsList[0]['Cust_Name'].toString();
+    cus_contact = custDetailsList[0]['Cust_Phone'].toString();
+    print("card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
+  }
+
 ///////////////////////////////////////////////
+
   getTableList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = await prefs.getString("os");
@@ -466,7 +513,6 @@ class Controller extends ChangeNotifier {
     isTableLoading = false;
     notifyListeners();
   }
-
 
   ////////////////////////////////////
   setDate(String date1, String date2) {
@@ -508,10 +554,6 @@ class Controller extends ChangeNotifier {
     print("object$itemcount");
   }
 
-
-
- 
-
   ///////////////........................../////////////////////////////
   setCatID(String id, BuildContext context) {
     catlID = id;
@@ -521,12 +563,12 @@ class Controller extends ChangeNotifier {
   }
 
   /////////////////////////////////////////////////////////////////////
-  getOs() async {
+  getComnameAndUsername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // String? cid = await prefs.getString("cid");
-    // String? db = prefs.getString("db_name");
-    // String? brId = await prefs.getString("br_id");
+
     os = await prefs.getString("os");
+    cName = await prefs.getString("cname");
+    userName = await prefs.getString("st_uname");
     notifyListeners();
   }
 }
