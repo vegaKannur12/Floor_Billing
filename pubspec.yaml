@@ -50,6 +50,7 @@ dependencies:
   permission_handler: ^11.2.0
   google_fonts: ^6.1.0
   flutter_barcode_scanner: ^2.0.0
+  top_modal_sheet: ^2.1.0
 
 dev_dependencies:
   flutter_test:

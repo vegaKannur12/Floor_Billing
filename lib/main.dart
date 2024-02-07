@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
 bool isLoggedIn = false;
 bool isRegistered = false;
 Future<void> main() async {
@@ -24,15 +23,13 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(
-    MultiProvider(
+  runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Controller()),
       // ChangeNotifierProvider(create: (_) => RegistrationController()),
     ],
     child: const MyApp(),
-  )
-  );
+  ));
   // FlutterNativeSplash.remove();
 }
 
@@ -57,12 +54,9 @@ checkLogin() async {
   final stUname = prefs.getString("st_uname");
   final stPwd = prefs.getString("st_pwd");
 
-  if (stUname != null && stPwd != null) 
-  {
+  if (stUname != null && stPwd != null) {
     isAuthenticated = true;
-  } 
-  else 
-  {
+  } else {
     isAuthenticated = false;
   }
   return isAuthenticated;
@@ -89,20 +83,30 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness:
+          Platform.isAndroid ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: Colors.teal,
+      systemNavigationBarDividerColor: Colors.grey,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
     return MaterialApp(
       theme: ThemeData(
         primaryColor: Color.fromARGB(255, 112, 183, 154),
         secondaryHeaderColor: Color.fromARGB(255, 237, 231, 232),
       ),
       debugShowCheckedModeBanner: false,
-      home:  
+      home:
           // SplashScreen(),
-          // LoginPage(),
-          // Registration(),
-          // const HomeFloorBill(),
-           DBSelection()
-          // CartBag(),
-          // MyTextFieldScreen(),
+          LoginPage(),
+      // Registration(),
+      // const HomeFloorBill(),
+      //  DBSelection()
+      // CartBag(),
+      // MyTextFieldScreen(),
     );
   }
 }

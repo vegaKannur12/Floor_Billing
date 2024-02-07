@@ -81,9 +81,13 @@ class Controller extends ChangeNotifier {
   String u_id = "";
   String card_id = "";
   String disply_name = "";
+  String bag_no = "";
   List custDetailsList = [];
   String cus_name = "";
   String cus_contact = "";
+  List barcodeList=[];
+  List selectedBarcodeList=[];
+  String selectedBarcode="";
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -240,9 +244,9 @@ class Controller extends ChangeNotifier {
             "Flt_Display_Name", valueMap[0]["Flt_Display_Name"].toString());
         prefs.setString("st_uname", userName);
         prefs.setString("st_pwd", password);
-        getSalesman();
-        setUID();
-
+        await getSalesman();
+        await setUID();
+        SqlConn.disconnect();
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomeFloorBill()),
@@ -270,16 +274,47 @@ class Controller extends ChangeNotifier {
     notifyListeners();
   }
 
+  setBagNo(String data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("BagNo", data);
+    bag_no = data;
+    notifyListeners();
+  }
+setSelectedBarcode(String data)async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("SelBar", data);
+    selectedBarcode=data;
+    
+    notifyListeners();
+}
   getSalesman() async {
     var res = await SqlConn.readData("Flt_Sp_Get_Sm_List '$os'");
     var map = jsonDecode(res);
     print("Salesman Map--$map");
   }
 
-  getItemDetails() async {
-    var res = await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os',");
+  getItemDetails(BuildContext context, String barcodedata) async {
+    await initYearsDb(context, "");
+    var res =
+        await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os','$barcodedata'");
     var map = jsonDecode(res);
     print("Item details Map--$map");
+    selectedBarcode="";
+    barcodeList.clear();
+     if (map != null) {
+      for (var item in map) {
+        barcodeList.add(item);
+      }
+      
+    }
+
+    if (barcodeList.length==1) {
+      selectedBarcode=barcodeList[0]["Barcode"].toString().trim();
+      selectedBarcodeList.add(barcodeList);
+      print("Selected BarcodeList----^^^___$selectedBarcodeList");
+      notifyListeners();
+    }
+     notifyListeners();
   }
 
   ////////////////////////////////////////////////////////
@@ -442,25 +477,6 @@ class Controller extends ChangeNotifier {
   disconnectDB(BuildContext context) async {
     debugPrint("Disconnecting...!!!");
     try {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Please wait",
-                  style: TextStyle(fontSize: 13),
-                ),
-                SpinKitCircle(
-                  color: Colors.green,
-                )
-              ],
-            ),
-          );
-        },
-      );
       await SqlConn.disconnect();
       debugPrint("DisConnected----------!!!!!!!!!!!!!!");
     } catch (e) {
@@ -471,12 +487,15 @@ class Controller extends ChangeNotifier {
   }
 
 //////////////////////................/////////////////////////
-  getCustData(String cardNo) async {
+  getCustData(String cardNo, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("cardNo", cardNo);
+
     print('os ----- $os, cardNo ------->$cardNo');
+    await initYearsDb(context, "");
     var res = await SqlConn.readData("Flt_Sp_GetFloor_Cards '$os','$cardNo'");
     var map = jsonDecode(res);
+    SqlConn.disconnect();
     print("custdata------------>>$res");
 
     custDetailsList.clear();

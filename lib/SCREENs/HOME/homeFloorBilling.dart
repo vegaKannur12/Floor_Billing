@@ -1,4 +1,6 @@
 import 'package:floor_billing/DRAWER/drawerPage.dart';
+import 'package:floor_billing/SCREENs/ITEMDATA/itemAddPage.dart';
+import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -23,17 +25,24 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   TextEditingController cardno = TextEditingController();
   TextEditingController custname = TextEditingController();
   TextEditingController custphon = TextEditingController();
-  TextEditingController billno = TextEditingController();
+  TextEditingController bagno = TextEditingController();
   TextEditingController itemname = TextEditingController();
   TextEditingController rate = TextEditingController();
-  FocusNode firstFocusNode = FocusNode();
+  FocusNode cardfocus = FocusNode();
+  FocusNode bagFocus = FocusNode();
   String _scanBarcode = 'Unknown';
   @override
   void initState() {
     super.initState();
-    firstFocusNode.addListener(() {
-      if (!firstFocusNode.hasFocus) {
+    cardfocus.addListener(() {
+      if (!cardfocus.hasFocus) {
         getCustdetails(cardno.text.toString());
+      }
+    });
+    bagFocus.addListener(() {
+      if (!bagFocus.hasFocus) {
+        Provider.of<Controller>(context, listen: false)
+            .setBagNo(bagno.text.toString());
       }
     });
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -43,7 +52,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   }
 
   getCustdetails(String cardno) async {
-    Provider.of<Controller>(context, listen: false).getCustData(cardno);
+    Provider.of<Controller>(context, listen: false)
+        .getCustData(cardno, context);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cusname = prefs.getString("Cust_Name");
     String? cusfon = prefs.getString("Cust_Phone");
@@ -66,7 +76,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
 
   @override
   void dispose() {
-    firstFocusNode.removeListener(() {});
+    cardfocus.removeListener(() {});
     super.dispose();
   }
 
@@ -124,6 +134,35 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         ],
       ),
       drawer: DrawerPage(),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(bottom: 20),
+        height: 70,
+        width: size.width,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(5),
+            topRight: Radius.circular(5),
+          ),
+        ),
+        child: Consumer<Controller>(
+            builder: (context, value, child) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {},
+                      child: Text("Bag1"),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {},
+                      child: Text("Bag2"),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {},
+                      child: Text("Bag3"),
+                    )
+                  ],
+                )),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Consumer<Controller>(
@@ -138,9 +177,15 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   SizedBox(
                     height: 60,
                     child: TextFormField(
-                      focusNode: firstFocusNode,
+                      focusNode: cardfocus,
                       controller: cardno,
                       onChanged: (val) {},
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Please Select Card Number';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(
                           errorBorder: UnderlineInputBorder(),
                           suffixIcon: IconButton(
@@ -193,8 +238,18 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   SizedBox(
                     height: 60,
                     child: TextFormField(
-                      controller: billno,
-                      onChanged: (val) {},
+                      focusNode: bagFocus,
+                      controller: bagno,
+                      onChanged: (val) {
+                        Provider.of<Controller>(context, listen: false)
+                            .setBagNo(bagno.text.toString());
+                      },
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Please Select Bag Number';
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(
                           errorBorder: UnderlineInputBorder(),
                           suffixIcon: IconButton(
@@ -209,41 +264,49 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   const SizedBox(
                     height: 15,
                   ),
-                  SizedBox(
-                    height: 55,
-                    child: TextFormField(
-                      controller: itemname,
-                      onChanged: (val) {},
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(),
-                          errorBorder: UnderlineInputBorder(),
-                          prefixIcon: Icon(
-                            Icons.phone_android,
-                            color: Colors.blue,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 50,
+                        width: 150,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (bagno.text.toString().isEmpty ||
+                                value.card_id.isEmpty) {
+                              CustomSnackbar snackbar = CustomSnackbar();
+                              snackbar.showSnackbar(
+                                  context, "Please select Card & Bag ...", "");
+                            } else {
+                              print("card---->${value.card_id.toString()}");
+                              print("bag---->${value.bag_no.toString()}");
+                              Provider.of<Controller>(context, listen: false)
+                                  .getItemDetails(context,value.bag_no.toString());
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ItemAddPage()),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
                           ),
-                          hintText: "Item name"),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  SizedBox(
-                    height: 55,
-                    child: TextFormField(
-                      controller: rate,
-                      onChanged: (val) {},
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(),
-                          errorBorder: UnderlineInputBorder(),
-                          prefixIcon: Icon(
-                            Icons.phone_android,
-                            color: Colors.blue,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(top: 12.0, bottom: 12),
+                            child: Text(
+                              "NEXT",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  color:
+                                      Theme.of(context).secondaryHeaderColor),
+                            ),
                           ),
-                          hintText: "Rate"),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
+                        ),
+                      )
+                    ],
                   ),
                 ],
               ),
@@ -264,7 +327,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         if (field == "card") {
           cardno.text = _scanBarcode.toString();
         } else {
-          billno.text = _scanBarcode.toString();
+          bagno.text = _scanBarcode.toString();
         }
       });
     } on PlatformException {
