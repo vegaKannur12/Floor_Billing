@@ -9,7 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:month_year_picker/month_year_picker.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 bool isLoggedIn = false;
 bool isRegistered = false;
 Future<void> main() async {
@@ -100,13 +101,22 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home:
-          // SplashScreen(),
-          LoginPage(),
+          SplashScreen(),
+          // LoginPage(),
       // Registration(),
       // const HomeFloorBill(),
       //  DBSelection()
       // CartBag(),
       // MyTextFieldScreen(),
+       localizationsDelegates: const [
+        GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        MonthYearPickerLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('en', 'GB'),
+      ],
     );
   }
 }

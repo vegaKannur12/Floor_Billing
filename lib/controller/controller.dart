@@ -85,9 +85,12 @@ class Controller extends ChangeNotifier {
   List custDetailsList = [];
   String cus_name = "";
   String cus_contact = "";
-  List barcodeList=[];
-  List selectedBarcodeList=[];
-  String selectedBarcode="";
+  List barcodeList = [];
+  List selectedBarcodeList = [];
+  String selectedBarcode = "";
+  double netamt = 0.0;
+  List<Map<dynamic, dynamic>> salesManlist = [];
+  Map selectedSalesMan = {};
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -205,7 +208,6 @@ class Controller extends ChangeNotifier {
             // ignore: use_build_context_synchronously
             snackbar.showSnackbar(context, msg.toString(), "");
           }
-
           notifyListeners();
         } catch (e) {
           // ignore: avoid_print
@@ -280,17 +282,30 @@ class Controller extends ChangeNotifier {
     bag_no = data;
     notifyListeners();
   }
-setSelectedBarcode(String data)async{
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("SelBar", data);
-    selectedBarcode=data;
-    
+
+  changeSalesman(Map val) {
+    selectedSalesMan = val;
     notifyListeners();
-}
+  }
+
+  setSelectedBarcode(String data) async {
+    print("barcode select----------->>> $data}");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("SelBar", data.toString());
+    selectedBarcode = data.toString();
+    notifyListeners();
+  }
+
   getSalesman() async {
     var res = await SqlConn.readData("Flt_Sp_Get_Sm_List '$os'");
     var map = jsonDecode(res);
-    print("Salesman Map--$map");
+    salesManlist.clear();
+    for (var item in map) {
+      salesManlist.add(item);
+    }
+    selectedSalesMan = salesManlist[0];
+    notifyListeners();
+    print("Salesman List--$salesManlist");
   }
 
   getItemDetails(BuildContext context, String barcodedata) async {
@@ -299,22 +314,59 @@ setSelectedBarcode(String data)async{
         await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os','$barcodedata'");
     var map = jsonDecode(res);
     print("Item details Map--$map");
-    selectedBarcode="";
+    // selectedBarcode = "";
+    notifyListeners();
     barcodeList.clear();
-     if (map != null) {
+    if (map != null) {
       for (var item in map) {
         barcodeList.add(item);
       }
-      
     }
 
-    if (barcodeList.length==1) {
-      selectedBarcode=barcodeList[0]["Barcode"].toString().trim();
-      selectedBarcodeList.add(barcodeList);
-      print("Selected BarcodeList----^^^___$selectedBarcodeList");
+    if (barcodeList.length == 1) {
+      selectedBarcode = barcodedata;
+      notifyListeners();
+      // barcodeList[0]["Barcode"].toString().trim();
+      // if (selectedBarcodeList.isEmpty) {
+      //   selectedBarcodeList.add(barcodeList[0]);
+      //   notifyListeners();
+      // } else {
+      //   for (var map in selectedBarcodeList) {
+      //     if (map.containsKey("Barcode")) {
+      //       if (map["Barcode"] == barcodedata) {
+      //         print("already exist---");
+      //       } else {
+      //         selectedBarcodeList.add(barcodeList[0]);
+      //         notifyListeners();
+      //       }
+      //     }
+      //   }
+       
+      // }
+
+ for (var item in barcodeList) {
+    var barcode = item['Barcode'];
+    bool barcodeExists = selectedBarcodeList.any((element) => element['Barcode'] == barcode);
+    if (!barcodeExists) {
+      selectedBarcodeList.add(item);
+    }
+  } 
+
       notifyListeners();
     }
-     notifyListeners();
+    qty = List.generate(selectedBarcodeList.length, (index) => TextEditingController());
+    isAdded = List.generate(selectedBarcodeList.length, (index) => false);
+    // response = List.generate(selectedBarcodeList.length, (index) => 0);
+    for (int i = 0; i < selectedBarcodeList.length; i++) {
+      // qty[i].text = "1.0";
+      qty[i].text = selectedBarcodeList[0]["Qty"].toString();
+      // response[i] = 0;
+    }
+    isLoading = false;
+    notifyListeners();
+    print("Selected Barcode----^^^___$selectedBarcode");
+    print("Selected BarcodeList----^^^___$selectedBarcodeList");
+    notifyListeners();
   }
 
   ////////////////////////////////////////////////////////
@@ -505,8 +557,8 @@ setSelectedBarcode(String data)async{
     print("customer Data List ==$custDetailsList");
     prefs.setInt("CardID", custDetailsList[0]['CardID']);
     card_id = custDetailsList[0]['CardID'].toString();
-    cus_name = custDetailsList[0]['Cust_Name'].toString();
-    cus_contact = custDetailsList[0]['Cust_Phone'].toString();
+    cus_name = custDetailsList[0]['Cust_Name'].toString().trim();
+    cus_contact = custDetailsList[0]['Cust_Phone'].toString().trim();
     print("card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
   }
 
