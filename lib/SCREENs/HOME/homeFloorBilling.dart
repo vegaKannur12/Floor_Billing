@@ -1,6 +1,8 @@
 import 'package:floor_billing/DRAWER/drawerPage.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/itemAddPage.dart';
+import 'package:floor_billing/SCREENs/ITEMDATA/viewcart.dart';
 import 'package:floor_billing/components/custom_snackbar.dart';
+import 'package:floor_billing/peridic_fun.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -34,6 +36,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   @override
   void initState() {
     super.initState();
+    // FunctionUtils.runFunctionPeriodically(context);
     cardfocus.addListener(() {
       if (!cardfocus.hasFocus) {
         getCustdetails(cardno.text.toString());
@@ -148,18 +151,21 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
             builder: (context, value, child) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    OutlinedButton(
-                      onPressed: () {},
-                      child: Text("Bag1"),
-                    ),
-                    OutlinedButton(
-                      onPressed: () {},
-                      child: Text("Bag2"),
-                    ),
-                    OutlinedButton(
-                      onPressed: () {},
-                      child: Text("Bag3"),
-                    )
+                    ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.all(15),
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.black,
+                            textStyle: TextStyle(fontSize: 18)),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ViewCartPage()),
+                          );
+                        },
+                        icon: Icon(Icons.shopping_cart),
+                        label: Text("VIEW CART"))
                   ],
                 )),
       ),
@@ -240,13 +246,15 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                     child: TextFormField(
                       focusNode: bagFocus,
                       controller: bagno,
-                      onChanged: (val) {
+                      onFieldSubmitted: (_) {
                         Provider.of<Controller>(context, listen: false)
-                            .setBagNo(bagno.text.toString());
+                            .getBagDetails(bagno.text.toString(), context);
                       },
+                      onChanged: (val) {},
                       validator: (text) {
                         if (text == null || text.isEmpty) {
-                          return 'Please Select Bag Number';
+                          Provider.of<Controller>(context, listen: false)
+                              .setbagerror("Please Select Bag Number");
                         }
                         return null;
                       },
@@ -260,6 +268,12 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           ),
                           hintText: "Bag Number"),
                     ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 50, width: 100, child: value.baggerror),
+                    ],
                   ),
                   const SizedBox(
                     height: 15,
@@ -280,8 +294,17 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             } else {
                               print("card---->${value.card_id.toString()}");
                               print("bag---->${value.bag_no.toString()}");
+
                               Provider.of<Controller>(context, listen: false)
-                                  .getItemDetails(context,value.bag_no.toString());
+                                  .getItemDetails(
+                                      context, value.bag_no.toString());
+                              Provider.of<Controller>(context, listen: false)
+                                  .getCart(context);
+                              Provider.of<Controller>(context, listen: false)
+                                  .setcusnameAndPhone(custname.text.toString(),
+                                      custphon.text.toString(), context);
+                              print(
+                                  "namee------ ${custname.text.toString()},  phone---${custphon.text.toString()}");
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -326,8 +349,14 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         _scanBarcode = barcode;
         if (field == "card") {
           cardno.text = _scanBarcode.toString();
+          _scanBarcode = "";
+          Provider.of<Controller>(context, listen: false)
+              .getCustData(cardno.text.toString(), context);
         } else {
           bagno.text = _scanBarcode.toString();
+          _scanBarcode = "";
+          Provider.of<Controller>(context, listen: false)
+              .getBagDetails(bagno.text.toString(), context);
         }
       });
     } on PlatformException {

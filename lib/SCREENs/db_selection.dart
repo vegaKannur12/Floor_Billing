@@ -103,6 +103,7 @@ class _DBSelectionState extends State<DBSelection> {
                                           Provider.of<Controller>(context,
                                                   listen: false)
                                               .initYearsDb(context, "");
+                                              
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(

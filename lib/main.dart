@@ -23,7 +23,10 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
+ FlutterError.onError = (FlutterErrorDetails details) {
+    print('Global error caught: ${details.exception}');
+    // Handle or log the error as needed
+  };
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Controller()),
