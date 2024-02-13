@@ -1,4 +1,5 @@
 import 'package:floor_billing/DRAWER/drawerPage.dart';
+import 'package:floor_billing/SCREENs/ITEMDATA/bagwise_items.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/itemAddPage.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/viewcart.dart';
 import 'package:floor_billing/components/custom_snackbar.dart';
@@ -14,6 +15,7 @@ import 'package:floor_billing/components/sizeScaling.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:floor_billing/db_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:badges/badges.dart' as badges;
 
 class HomeFloorBill extends StatefulWidget {
   const HomeFloorBill({super.key});
@@ -23,10 +25,10 @@ class HomeFloorBill extends StatefulWidget {
 }
 
 class _HomeFloorBillState extends State<HomeFloorBill> {
-  String? date;
+  String date = "";
   TextEditingController cardno = TextEditingController();
-  TextEditingController custname = TextEditingController();
-  TextEditingController custphon = TextEditingController();
+  // TextEditingController custname = TextEditingController();
+  // TextEditingController custphon = TextEditingController();
   TextEditingController bagno = TextEditingController();
   TextEditingController itemname = TextEditingController();
   TextEditingController rate = TextEditingController();
@@ -56,24 +58,9 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
 
   getCustdetails(String cardno) async {
     Provider.of<Controller>(context, listen: false)
-        .getCustData(cardno, context);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cusname = prefs.getString("Cust_Name");
-    String? cusfon = prefs.getString("Cust_Phone");
-    if (cusname.toString().isNotEmpty &&
-        cusname.toString() != " " &&
-        cusname.toString() != "" &&
-        cusname.toString() != "null" &&
-        cusname != null) {
-      custname.text = cusname.toString();
-    }
-    if (cusfon.toString().isNotEmpty &&
-        cusfon.toString() != " " &&
-        cusfon.toString() != "" &&
-        cusfon.toString() != "null" &&
-        cusfon != null) {
-      custphon.text = cusfon.toString();
-    }
+        .getCustData(date, cardno, context);
+
+    setState(() {});
     print("User clicked outside the Text Form Field");
   }
 
@@ -148,26 +135,49 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
           ),
         ),
         child: Consumer<Controller>(
-            builder: (context, value, child) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.all(15),
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.black,
-                            textStyle: TextStyle(fontSize: 18)),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ViewCartPage()),
-                          );
-                        },
-                        icon: Icon(Icons.shopping_cart),
-                        label: Text("VIEW CART"))
-                  ],
-                )),
+            builder: (context, value, child) => ListView.builder(
+              scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: value.usedbagList.length,
+                itemBuilder: (context, index) {
+                  return Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(right: 10, left: 10),
+                        child: Row(
+                          children: [
+                            badges.Badge(
+                              badgeStyle:
+                                  badges.BadgeStyle(badgeColor: Colors.black),
+                              position:
+                                  badges.BadgePosition.topEnd(top: -5, end: -10),
+                              showBadge: true,
+                              badgeContent: Text(
+                                value.usedbagList.length == null
+                                    ? "0"
+                                    : value.usedbagList.length.toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              child: OutlinedButton(
+                                  onPressed: () {
+                                    Provider.of<Controller>(context, listen: false)
+                                        .getUsedBagsItems(context, date.toString(),
+                                            value.usedbagList[index]["Slot_Id"]);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => BagwiseItems(slotname: value.usedbagList[index]["Slot_Name"].toString(),)),
+                                    );
+                                  },
+                                  child: Text(value.usedbagList[index]["Slot_Name"]
+                                      .toString())),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                })),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -208,7 +218,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   SizedBox(
                     height: 55,
                     child: TextFormField(
-                      controller: custname,
+                      controller: value.ccname,
                       onChanged: (val) {},
                       decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(),
@@ -226,7 +236,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   SizedBox(
                     height: 55,
                     child: TextFormField(
-                      controller: custphon,
+                      controller: value.ccfon,
                       onChanged: (val) {},
                       decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(),
@@ -247,6 +257,9 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                       focusNode: bagFocus,
                       controller: bagno,
                       onFieldSubmitted: (_) {
+                        Provider.of<Controller>(context, listen: false)
+                            .setcusnameAndPhone(
+                                value.ccname.text, value.ccfon.text, context);
                         Provider.of<Controller>(context, listen: false)
                             .getBagDetails(bagno.text.toString(), context);
                       },
@@ -301,10 +314,10 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                               Provider.of<Controller>(context, listen: false)
                                   .getCart(context);
                               Provider.of<Controller>(context, listen: false)
-                                  .setcusnameAndPhone(custname.text.toString(),
-                                      custphon.text.toString(), context);
+                                  .setcusnameAndPhone(value.ccname.text,
+                                      value.ccfon.text, context);
                               print(
-                                  "namee------ ${custname.text.toString()},  phone---${custphon.text.toString()}");
+                                  "namee------ ${value.ccname.text},  phone---${value.ccfon.text}");
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -351,7 +364,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
           cardno.text = _scanBarcode.toString();
           _scanBarcode = "";
           Provider.of<Controller>(context, listen: false)
-              .getCustData(cardno.text.toString(), context);
+              .getCustData(date, cardno.text.toString(), context);
         } else {
           bagno.text = _scanBarcode.toString();
           _scanBarcode = "";

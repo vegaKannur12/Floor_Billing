@@ -53,6 +53,7 @@ dependencies:
   top_modal_sheet: ^2.1.0
   flutter_localization: ^0.2.0
   month_year_picker: ^0.3.0+1
+  badges: ^3.1.2
 
 dev_dependencies:
   flutter_test:
