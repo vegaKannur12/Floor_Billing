@@ -46,13 +46,6 @@ class Controller extends ChangeNotifier {
 
   List<bool> isAdded = [];
 
-  List<Map<String, dynamic>> tabllist = [
-    {"tab": "Table 1", "tid": 1},
-    {"tab": "Table 2", "tid": 2},
-    {"tab": "Table 3", "tid": 3},
-    {"tab": "Table 4", "tid": 4},
-    {"tab": "Table 5", "tid": 5},
-  ];
   List<Map<String, dynamic>> catlist = [
     {"catid": "C1", "catname": "Category1"},
     {"catid": "C2", "catname": "Category2"},
@@ -110,7 +103,11 @@ class Controller extends ChangeNotifier {
   double unsaved_tot = 0.0;
   List usedbagList = [];
   List usedbagITEMList = [];
+  Map<int, double> floor_totl = {};
+  double all_total = 0.0;
   Map<int, List<Map<String, dynamic>>> itemSortedList = {};
+  int allbagallcount = 0;
+  List fbList = [];
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -978,47 +975,86 @@ class Controller extends ChangeNotifier {
 
 /////////////////////////////////////////////////////////////////
   ///
-  updateCart(BuildContext context, String dd, String sm, String bch, double qt,
-      double dic, int status) async {
+  updateCart(BuildContext context, String dd, String sm, int? cartrow,
+      String bch, double qt, double dic, int status) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     os = await prefs.getString("os");
     try {
-      print(
-          "update data====== ${'Flt_Update_FB_Cart $cart_id, $dd, $card_id, $cus_name, $cus_contact, $slot_id, 0, $sm, $os, $bch ,$qt , $srate, $dic, $status'}");
-      var res = await SqlConn.readData(
-          "Flt_Update_FB_Cart '$cart_id','$dd','$card_id','$cus_name','$cus_contact','$slot_id',0,'$sm','$os','$bch','$qt','$srate','$dic',$status");
-      var map = jsonDecode(res);
-      // SqlConn.disconnect();
-      print("update Map------------>>$map");
-      if (map.isNotEmpty) {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Added to cart",
-                    style: TextStyle(fontSize: 18),
+      if (status == 0) {
+        print(
+            "update data====== ${'Flt_Update_FB_Cart $cart_id, $dd, $card_id, $cus_name, $cus_contact, $slot_id, $cartrow, $sm, $os, $bch ,$qt , $srate, $dic, $status'}");
+        var res = await SqlConn.readData(
+            "Flt_Update_FB_Cart '$cart_id','$dd','$card_id','$cus_name','$cus_contact','$slot_id',$cartrow,'$sm','$os','$bch','$qt','$srate','$dic',$status");
+        var map = jsonDecode(res);
+        if (map.isNotEmpty) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Added to cart",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('Ok'),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ],
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('Ok'),
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                  },
+              );
+            },
+          );
+          print("update Map------------>>$map");
+        }
+      } else {
+        print(
+            "delete data====== ${'Flt_Update_FB_Cart $cart_id, $dd, $card_id, $cus_name, $cus_contact, $slot_id, $cartrow, $sm, $os, $bch ,$qt , $srate, $dic, $status'}");
+        var res = await SqlConn.readData(
+            "Flt_Update_FB_Cart '$cart_id','$dd','$card_id','$cus_name','$cus_contact','$slot_id',$cartrow,'$sm','$os','$bch','$qt','$srate','$dic',$status");
+        var map = jsonDecode(res);
+        if (map.isNotEmpty) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Item deleted",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          },
-        );
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('Ok'),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          print("update Map------------>>$map");
+        }
       }
+
+      // SqlConn.disconnect();
     } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
@@ -1143,10 +1179,18 @@ class Controller extends ChangeNotifier {
       var map = jsonDecode(res);
       // SqlConn.disconnect();
       usedbagList.clear();
+      allbagallcount = 0;
+      notifyListeners();
       for (var item in map) {
         usedbagList.add(item);
       }
       print("used bag list------------>>$res");
+      for (int i = 0; i < usedbagList.length; i++) {
+        allbagallcount =
+            allbagallcount + int.parse(usedbagList[i]["Cnt"].toString());
+        print("alll count======$allbagallcount");
+        notifyListeners();
+      }
 
       notifyListeners();
     } on PlatformException catch (e) {
@@ -1199,6 +1243,9 @@ class Controller extends ChangeNotifier {
       var map = jsonDecode(res);
       usedbagITEMList.clear();
       itemSortedList.clear();
+      floor_totl.clear();
+      all_total = 0.0;
+      notifyListeners();
       for (var item in map) {
         usedbagITEMList.add(item);
         int fbNo = item['FB_No'];
@@ -1207,6 +1254,18 @@ class Controller extends ChangeNotifier {
         }
         itemSortedList[fbNo]!.add(item);
       }
+
+      itemSortedList.forEach((key, value) {
+        double sum = 0;
+        for (var element in value) {
+          sum += element['Amount'];
+        }
+        floor_totl[key] = sum;
+        notifyListeners();
+        print("fffffffffffffffffffffffffoooooooooooooooooo${floor_totl[key]}");
+      });
+      all_total = floor_totl.values.fold(0, (prev, value) => prev + value);
+      notifyListeners();
 
       print("used bag ITEMS------------>>$usedbagITEMList");
       print("SorteD ITEMS------------>>$itemSortedList");
@@ -1327,24 +1386,23 @@ class Controller extends ChangeNotifier {
   }
 //////////////////////////////////////////////
 
-  getTableList() async {
+  getFBList(String date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = await prefs.getString("os");
-    String? smid = await prefs.getString("Sm_id");
-    print("tabl para---------$os---$smid");
-    isTableLoading = true;
-    notifyListeners();
-    var res = await SqlConn.readData("Flt_Sp_Get_Tables '$os','$smid'");
+    int car;
+    card_id == "" ? car = 0 : car = int.parse(card_id);
+
+    print("tabl para------$date----$os----$car");
+
+    var res = await SqlConn.readData("Flt_Sp_Get_Fb_List '$date',$car,'$os'");
     var map = jsonDecode(res);
-    tabllist.clear();
+    fbList.clear();
     if (map != null) {
       for (var item in map) {
-        tabllist.add(item);
+        fbList.add(item);
       }
     }
-    print("tablelist-$res");
-
-    isTableLoading = false;
+    print("fbList-----$res");
     notifyListeners();
   }
 

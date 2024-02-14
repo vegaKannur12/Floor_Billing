@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 bool isLoggedIn = false;
 bool isRegistered = false;
 Future<void> main() async {
@@ -23,7 +24,7 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
- FlutterError.onError = (FlutterErrorDetails details) {
+  FlutterError.onError = (FlutterErrorDetails details) {
     print('Global error caught: ${details.exception}');
     // Handle or log the error as needed
   };
@@ -87,7 +88,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -103,15 +103,17 @@ class MyApp extends StatelessWidget {
         secondaryHeaderColor: Color.fromARGB(255, 237, 231, 232),
       ),
       debugShowCheckedModeBanner: false,
-      home:
-          SplashScreen(),
-          // LoginPage(),
+      routes: {
+        '/floorhome': (context) => HomeFloorBill(),
+      },
+      home: SplashScreen(),
+      // LoginPage(),
       // Registration(),
       // const HomeFloorBill(),
       //  DBSelection()
       // CartBag(),
       // MyTextFieldScreen(),
-       localizationsDelegates: const [
+      localizationsDelegates: const [
         GlobalWidgetsLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         MonthYearPickerLocalizations.delegate,

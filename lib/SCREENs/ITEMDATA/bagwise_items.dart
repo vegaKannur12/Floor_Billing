@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class BagwiseItems extends StatefulWidget {
-  final String slotname;
-  const BagwiseItems({super.key, required this.slotname});
+  final String cardNumbr;
+  const BagwiseItems({super.key, required this.cardNumbr});
 
   @override
   State<BagwiseItems> createState() => _BagwiseItemsState();
@@ -14,6 +14,7 @@ class _BagwiseItemsState extends State<BagwiseItems> {
   double totl = 0.0;
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
@@ -21,15 +22,34 @@ class _BagwiseItemsState extends State<BagwiseItems> {
         title: Consumer<Controller>(
             builder: (BuildContext context, Controller value, Widget? child) =>
                 Text(
-                  widget.slotname,
+                  widget.cardNumbr,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 )),
       ),
-      bottomNavigationBar: Container(
-        child: Text(totl.toStringAsFixed(2)),
+      bottomNavigationBar: Consumer<Controller>(
+        builder: (BuildContext context, Controller value, Widget? child) {
+          return Container(
+            color: Colors.black,
+            height: 40,
+            width: size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "GRAND TOTAL",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  "${value.all_total.toStringAsFixed(2)}",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          );
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
@@ -38,9 +58,10 @@ class _BagwiseItemsState extends State<BagwiseItems> {
             return ListView.builder(
               itemCount: value.itemSortedList.length,
               itemBuilder: (context, index) {
+                totl = 0.0;
                 int key = value.itemSortedList.keys.elementAt(index);
                 List<Map<String, dynamic>> list = value.itemSortedList[key]!;
-                totl = totl + double.parse(list[index]['Amount'].toString());
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -53,7 +74,8 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         Text(
-                          widget.slotname,
+                          list.first['Slot_Name'].toString(),
+                          // widget.slotname,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
                         )
@@ -66,7 +88,7 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                       itemCount: list.length,
                       itemBuilder: (context, listIndex) {
                         Map<String, dynamic> item = list[listIndex];
-
+                        totl = totl + double.parse(item['Amount'].toString());
                         print(totl);
                         return Card(
                           child: ListTile(
@@ -81,23 +103,44 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                                       fontSize: 15),
                                 ),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text('Rate: ${item['Rate']}'),
+                                  ],
+                                ),
+                                Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Rate: ${item['Rate']}'),
                                     Text('Qty: ${item['Qty']}'),
+                                    Text('\u20B9 ${item['Amount']}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15)),
                                   ],
                                 ),
-                                Text('\u20B9 ${item['Amount']}',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15)),
                               ],
                             ),
                             // Add more information if needed
                           ),
                         );
                       },
+                    ),
+                    Container(
+                        padding: EdgeInsets.only(right: 20),
+                        height: 40,
+                        width: size.width,
+                        color: Colors.blue,
+                        child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                                "\u20B9 ${value.floor_totl[key]!.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18)))),
+                    SizedBox(
+                      height: 20,
                     ),
                   ],
                 );

@@ -235,31 +235,29 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                       ),
                                                       TextButton(
                                                         onPressed: () {
-                                                          Provider.of<Controller>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .updateCart(
-                                                            context,
-                                                            date,
-                                                            value.unsavedList[
-                                                                    index][
-                                                                    "Cart_Sm_Code"]
-                                                                .toString(),
-                                                            value.unsavedList[
-                                                                    index][
-                                                                    "Cart_Batch"]
-                                                                .toString(),
-                                                            double.parse(value
-                                                                .unsavedList[
-                                                                    index]
-                                                                    ["Cart_Qty"]
-                                                                .toString()),
-                                                            double.parse(value
-                                                                .unsavedList[
-                                                                    index][
-                                                                    "DiscValue"]
-                                                                .toString()),1
-                                                          );
+                                                          Provider.of<Controller>(context, listen: false).updateCart(
+                                                              context,
+                                                              date.toString(),
+                                                              value.unsavedList[index]["Cart_Sm_Code"]
+                                                                  .toString(),
+                                                              value.unsavedList[index]
+                                                                  ["Cart_Row"],
+                                                              value
+                                                                  .unsavedList[index]
+                                                                      [
+                                                                      "Cart_Batch"]
+                                                                  .toString()
+                                                                  .trim(),
+                                                              double.parse(value
+                                                                  .unsavedList[index]
+                                                                      [
+                                                                      "Cart_Qty"]
+                                                                  .toString()),
+                                                              double.parse(value
+                                                                  .unsavedList[index]
+                                                                      ["Cart_Disc_Per"]
+                                                                  .toString()),
+                                                              1);
                                                           Provider.of<Controller>(
                                                                   context,
                                                                   listen: false)
