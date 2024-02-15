@@ -66,7 +66,7 @@ class _ViewCartPageState extends State<ViewCartPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar:Provider.of<Controller>(context, listen: false).unsavedList.isEmpty?Container(): Container(
         padding: EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
         height: 80,
         width: size.width,
@@ -96,6 +96,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                         onPressed: () {
                           Provider.of<Controller>(context, listen: false)
                               .savefloorbill(date.toString());
+                          Provider.of<Controller>(context, listen: false)
+                              .getUsedBagsItems(context, date.toString(), 0);
                           showDialog(
                             context: context,
                             builder: (context) {

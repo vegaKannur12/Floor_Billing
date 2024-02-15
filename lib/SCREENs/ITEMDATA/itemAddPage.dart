@@ -37,7 +37,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController bagno = TextEditingController();
   FocusNode bagFocus = FocusNode();
-  bool tapped = false;
+  // bool tapped = false;
   @override
   void initState() {
     super.initState();
@@ -98,7 +98,8 @@ class _ItemAddPageState extends State<ItemAddPage> {
         canPop: false,
         onPopInvoked: (_) {
           if (Provider.of<Controller>(context, listen: false)
-                  .unsavedList.isEmpty) {
+              .unsavedList
+              .isEmpty) {
             Navigator.pushNamed(context, '/floorhome');
           } else {
             _showBackDialog();
@@ -131,10 +132,10 @@ class _ItemAddPageState extends State<ItemAddPage> {
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                tapped = true;
+                                value.tapped = true;
                               });
                             },
-                            child: tapped
+                            child: value.tapped
                                 ? SizedBox(
                                     height: 60,
                                     width: 130,
@@ -144,14 +145,16 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                       ),
                                       focusNode: bagFocus,
                                       controller: bagno,
-                                      onChanged: (val) {
-                                        Provider.of<Controller>(context,
-                                                listen: false)
-                                            .setBagNo(bagno.text.toString());
-                                      },
+                                      onChanged: (val) {},
                                       onFieldSubmitted: (_) {
                                         setState(() {
-                                          tapped = false;
+                                          Provider.of<Controller>(context,
+                                                  listen: false)
+                                              .getBagDetails(
+                                                  bagno.text.toString(),
+                                                  context,
+                                                  "add");
+                                          // tapped = false;
                                         });
                                       },
                                       validator: (text) {
@@ -731,7 +734,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                           if (_formKey
                                                                               .currentState!
                                                                               .validate()) {}
-                                                                          if (double.parse(value.qty[index].text) ==
+                                                                          if (double.parse(value.qty[index].text) <=
                                                                               0.0) {
                                                                             CustomSnackbar
                                                                                 snackbar =
@@ -739,6 +742,15 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                             snackbar.showSnackbar(
                                                                                 context,
                                                                                 "Quantity can't be null...",
+                                                                                "");
+                                                                          } else if (value.slot_id ==
+                                                                              0) {
+                                                                            CustomSnackbar
+                                                                                snackbar =
+                                                                                CustomSnackbar();
+                                                                            snackbar.showSnackbar(
+                                                                                context,
+                                                                                "Select a Slot...",
                                                                                 "");
                                                                           } else {
                                                                             Provider.of<Controller>(context, listen: false).updateCart(

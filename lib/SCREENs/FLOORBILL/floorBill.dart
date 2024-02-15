@@ -46,7 +46,7 @@ class _FloorBillState extends State<FloorBill> {
                                 color: Color.fromARGB(255, 224, 235, 166),
                                 child: Center(
                                   child: Text(
-                                    value.os.toString(),
+                                    value.fbList[index]['Series'],
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),

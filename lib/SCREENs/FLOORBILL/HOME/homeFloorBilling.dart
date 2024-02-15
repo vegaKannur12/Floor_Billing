@@ -1,5 +1,6 @@
 import 'package:floor_billing/DRAWER/drawerPage.dart';
-import 'package:floor_billing/SCREENs/HOME/FLOORBILL/floorBill.dart';
+import 'package:floor_billing/SCREENs/FLOORBILL/floorBill.dart';
+
 import 'package:floor_billing/SCREENs/ITEMDATA/bagwise_items.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/itemAddPage.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/viewcart.dart';
@@ -29,7 +30,7 @@ class HomeFloorBill extends StatefulWidget {
 
 class _HomeFloorBillState extends State<HomeFloorBill> {
   String date = "";
-  TextEditingController cardno = TextEditingController();
+  // TextEditingController cardno = TextEditingController();
   // TextEditingController custname = TextEditingController();
   // TextEditingController custphon = TextEditingController();
   TextEditingController bagno = TextEditingController();
@@ -38,14 +39,19 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   FocusNode cardfocus = FocusNode();
   FocusNode bagFocus = FocusNode();
   String _scanBarcode = 'Unknown';
+  String ep="";
   
+
   @override
   void initState() {
     super.initState();
     // FunctionUtils.runFunctionPeriodically(context);
     cardfocus.addListener(() {
       if (!cardfocus.hasFocus) {
-        getCustdetails(cardno.text.toString());
+        getCustdetails(Provider.of<Controller>(context, listen: false)
+            .cardNoctrl
+            .text
+            .toString());
       }
     });
     bagFocus.addListener(() {
@@ -192,7 +198,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   BagwiseItems(
-                                                                      cardNumbr: cardno
+                                                                      cardNumbr: value
+                                                                          .cardNoctrl
                                                                           .text
                                                                           .toString())),
                                                         );
@@ -235,7 +242,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                             MaterialPageRoute(
                                                 builder: (context) =>
                                                     BagwiseItems(
-                                                      cardNumbr: cardno.text
+                                                      cardNumbr: value
+                                                          .cardNoctrl.text
                                                           .toString(),
                                                     )),
                                           );
@@ -310,8 +318,9 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 SizedBox(
                   height: 60,
                   child: TextFormField(
+                    ignorePointers: value.showadduser?true:false,
                     focusNode: cardfocus,
-                    controller: cardno,
+                    controller: value.cardNoctrl,
                     onChanged: (val) {},
                     validator: (text) {
                       if (text == null || text.isEmpty) {
@@ -335,6 +344,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 SizedBox(
                   height: 55,
                   child: TextFormField(
+                    // ignorePointers: value.typlock?true:false,
                     controller: value.ccname,
                     onChanged: (val) {},
                     decoration: InputDecoration(
@@ -353,6 +363,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 SizedBox(
                   height: 55,
                   child: TextFormField(
+                    // ignorePointers: value.typlock?true:false,
                     controller: value.ccfon,
                     onChanged: (val) {},
                     decoration: InputDecoration(
@@ -366,6 +377,51 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   ),
                 ),
                 const SizedBox(
+                  height: 10,
+                ),
+                value.adduserError,
+                 const SizedBox(
+                  height: 20,
+                ),
+                value.showadduser
+                    ? Row(mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              if (value.ccname.text=="" || value.ccfon.text=="") {
+                                       ep="Please enter Name & Contact";
+                                value.setaDDUserError("Please enter Name & Contact");
+                              } 
+                              else {
+                                value.createFloorCardsNew(date, value.ccname.text, value.ccfon.text,context);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black54
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 8),
+                              child: Text(
+                                "ADD NEW USER",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                    color: Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            child: IconButton(onPressed: (){
+                              value.userAddButtonDisable(false);
+                              value.ccfon.clear();
+                              value.ccname.clear();
+                              value.setaDDUserError("");
+                            }, icon: Icon(Icons.refresh)),
+                          )
+                      ],
+                    )
+                    : Container(),
+                const SizedBox(
                   height: 30,
                 ),
                 SizedBox(
@@ -378,7 +434,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           .setcusnameAndPhone(
                               value.ccname.text, value.ccfon.text, context);
                       Provider.of<Controller>(context, listen: false)
-                          .getBagDetails(bagno.text.toString(), context);
+                          .getBagDetails(bagno.text.toString(), context,"home");
                     },
                     onChanged: (val) {},
                     validator: (text) {
@@ -475,15 +531,21 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
       setState(() {
         _scanBarcode = barcode;
         if (field == "card") {
-          cardno.text = _scanBarcode.toString();
+          Provider.of<Controller>(context, listen: false).cardNoctrl.text =
+              _scanBarcode.toString();
           _scanBarcode = "";
-          Provider.of<Controller>(context, listen: false)
-              .getCustData(date, cardno.text.toString(), context);
+          Provider.of<Controller>(context, listen: false).getCustData(
+              date,
+              Provider.of<Controller>(context, listen: false)
+                  .cardNoctrl
+                  .text
+                  .toString(),
+              context);
         } else {
           bagno.text = _scanBarcode.toString();
           _scanBarcode = "";
           Provider.of<Controller>(context, listen: false)
-              .getBagDetails(bagno.text.toString(), context);
+              .getBagDetails(bagno.text.toString(), context,"home");
         }
       });
     } on PlatformException {

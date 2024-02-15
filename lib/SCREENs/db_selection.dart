@@ -35,9 +35,10 @@ class _DBSelectionState extends State<DBSelection> {
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
       child: Scaffold(
-        backgroundColor: parseColor("#46bdc6"),
-        appBar: AppBar(
-          backgroundColor: parseColor("#46bdc6"),
+        backgroundColor: Colors.black,
+        // parseColor("#46bdc6"),
+        appBar: AppBar(backgroundColor: Colors.black,
+          // backgroundColor: parseColor("#46bdc6"),
           elevation: 0,
           automaticallyImplyLeading: false,
           // title: Text(

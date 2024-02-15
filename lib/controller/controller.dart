@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/SCREENs/db_selection.dart';
-import 'package:floor_billing/SCREENs/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/MODEL/registration_model.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -90,14 +90,17 @@ class Controller extends ChangeNotifier {
   Map selectedSalesMan = {};
   List<TextEditingController> qty = [];
   List<TextEditingController> persntage = [];
+  List<TextEditingController> saved = [];
   TextEditingController ccname = TextEditingController();
   TextEditingController ccfon = TextEditingController();
+  TextEditingController cardNoctrl = TextEditingController();
   List<Text> netamt = [];
   bool showdata = false;
   int slot_id = 0;
   Text baggerror = Text("");
   Text salesError = Text("ytuytu");
   Text barcodeerror = Text("");
+  Text adduserError = Text("");
   int cart_id = 0;
   double srate = 0.0;
   double unsaved_tot = 0.0;
@@ -108,6 +111,9 @@ class Controller extends ChangeNotifier {
   Map<int, List<Map<String, dynamic>>> itemSortedList = {};
   int allbagallcount = 0;
   List fbList = [];
+  bool showadduser = false;
+  bool typlock = false;
+  bool tapped=false;
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -387,7 +393,7 @@ class Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  getBagDetails(String bagNo, BuildContext context) async {
+  getBagDetails(String bagNo, BuildContext context, String from) async {
     setbagerror("");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
@@ -402,8 +408,43 @@ class Controller extends ChangeNotifier {
       var map = jsonDecode(res);
       // SqlConn.disconnect();
       if (map.isEmpty) {
-        setbagerror("Invalid");
+        if (from == "home") {
+          setbagerror("Invalid");
+        } else {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Bag already taken",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('OK'),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );setBagNo("0");
+          slot_id = 0;
+          tapped=true;
+          notifyListeners();
+        }
       }
+      tapped=false;
+          notifyListeners();
       print("bag dataaa------------>>$res");
 
       bagDetailsList.clear();
@@ -630,7 +671,7 @@ class Controller extends ChangeNotifier {
     for (var item in map) {
       savedresult.add(item);
     }
-
+    unsavedList.clear();
     notifyListeners();
     print("Saved result--$savedresult");
   }
@@ -805,7 +846,7 @@ class Controller extends ChangeNotifier {
   }
 
 //////////////////////////////////////////////////////////time out
-  initDb(BuildContext context, String type) async {
+  Future<void> initDb(BuildContext context, String type) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? db = prefs.getString("old_db_name");
     String? ip = prefs.getString("ip");
@@ -815,25 +856,25 @@ class Controller extends ChangeNotifier {
     print("db: $db \n ip : $ip \n port : $port \n uname: $un \n pawd: $pw");
     debugPrint("Connecting..initdb.");
     try {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Please wait",
-                  style: TextStyle(fontSize: 13),
-                ),
-                SpinKitCircle(
-                  color: Colors.green,
-                )
-              ],
-            ),
-          );
-        },
-      );
+      // showDialog(
+      //   context: context,
+      //   builder: (context) {
+      //     return AlertDialog(
+      //       title: Row(
+      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //         children: [
+      //           Text(
+      //             "Please wait",
+      //             style: TextStyle(fontSize: 13),
+      //           ),
+      //           SpinKitCircle(
+      //             color: Colors.green,
+      //           )
+      //         ],
+      //       ),
+      //     );
+      //   },
+      // );
       await SqlConn.connect(
         ip: ip!, port: port!, databaseName: db!, username: un!, password: pw!,
         // ip:"192.168.18.37",
@@ -841,52 +882,15 @@ class Controller extends ChangeNotifier {
         // databaseName: "TL169715",
         // username: "sa",
         // password: "1"
-        // timeout: 10,
-      ).timeout(Duration(seconds: 10), onTimeout: () {
-        throw TimeoutException('Connection attempt timed out');
-      });
+        timeout: 8,
+      );
 
-      // ).timeout(
-      //   Duration(seconds: 10),
-      //   onTimeout: () {
-      //     print("time out..........................");
-      //     showDialog(
-      //       context: context,
-      //       builder: (context) {
-      //         // Navigator.push(
-      //         //   context,
-      //         //   new MaterialPageRoute(builder: (context) => HomePage()),
-      //         // );
-      //         // Future.delayed(Duration(seconds: 5), () {
-      //         //   Navigator.of(mycontxt).pop(true);
-      //         // });
-      //         return AlertDialog(
-      //           title: Row(
-      //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //             children: [
-      //               Text(
-      //                 "Timeout",
-      //                 style: TextStyle(fontSize: 13),
-      //               ),
-      //               SpinKitCircle(
-      //                 color: Colors.green,
-      //               )
-      //             ],
-      //           ),
-      //           actions: [
-      //             TextButton(
-      //                 onPressed: () async {
-      //                   await initDb(context, "");
-      //                 },
-      //                 child: Text('Try again'))
-      //           ],
-      //         );
-      //       },
-      //     );
-      //   },
-      // );
       debugPrint("Connected!");
       getDatabasename(context, type);
+      throw PlatformException(
+        code: 'ERROR',
+        message: 'Network error IOException: failed to connect...',
+      );
     } on TimeoutException catch (_) {
       // Handle timeout exception
       await SqlConn.disconnect();
@@ -920,7 +924,7 @@ class Controller extends ChangeNotifier {
       );
     } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
-      await SqlConn.disconnect();
+      // await SqlConn.disconnect();
       showDialog(
         context: context,
         builder: (context) {
@@ -929,9 +933,12 @@ class Controller extends ChangeNotifier {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Connection Lost...! ",
+                  "Not Connected.! ",
                   style: TextStyle(fontSize: 18),
                 ),
+                SpinKitCircle(
+                  color: Colors.green,
+                )
               ],
             ),
             actions: <Widget>[
@@ -939,10 +946,9 @@ class Controller extends ChangeNotifier {
                 style: TextButton.styleFrom(
                   textStyle: Theme.of(context).textTheme.labelLarge,
                 ),
-                child: const Text('Reconnect'),
+                child: const Text('Connect'),
                 onPressed: () async {
                   await initDb(context, "");
-
                   Navigator.of(context).pop();
                 },
               ),
@@ -956,7 +962,42 @@ class Controller extends ChangeNotifier {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     } finally {
-      Navigator.pop(context);
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        Navigator.pop(context);
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -1101,7 +1142,7 @@ class Controller extends ChangeNotifier {
     os = await prefs.getString("os");
     print('os ----- $os, cardNo ------->$cardNo');
     // await initYearsDb(context, "");
-    setcusnameAndPhone(" ", " ", context);
+    // setcusnameAndPhone(" ", " ", context);
     notifyListeners();
     try {
       var res = await SqlConn.readData("Flt_Sp_GetFloor_Cards '$os','$cardNo'");
@@ -1114,21 +1155,127 @@ class Controller extends ChangeNotifier {
         custDetailsList.add(item);
       }
       print("customer Data List ==$custDetailsList");
-      prefs.setInt("CardID", custDetailsList[0]['CardID']);
-      card_id = custDetailsList[0]['CardID'].toString();
-      if (custDetailsList[0]['Cust_Name'].toString().trim() == "" &&
-          custDetailsList[0]['Cust_Phone'].toString().trim() == "") {
+
+      if (custDetailsList.length == 0) {
         setcusnameAndPhone("", "", context);
+        cardNoctrl.clear();
+        userAddButtonDisable(true);
         notifyListeners();
       } else {
+        //  prefs.setInt("CardID", custDetailsList[0]['CardID']);
+        card_id = custDetailsList[0]['CardID'].toString();
         setcusnameAndPhone(custDetailsList[0]['Cust_Name'].toString().trim(),
             custDetailsList[0]['Cust_Phone'].toString().trim(), context);
-
+        getUsedBags(context, date, card_id);
         notifyListeners();
       }
-      getUsedBags(context, date, card_id);
+
       notifyListeners();
       print("card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
+    } on PlatformException catch (e) {
+      print("PlatformException occurredcttr: $e");
+      SqlConn.disconnect();
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Connection Lost...! ",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Reconnect'),
+                onPressed: () async {
+                  await initYearsDb(context, "");
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      // Handle the PlatformException here
+      // You can log the exception, display an error message, or take other appropriate actions
+    } catch (e) {
+      print("An unexpected error occurred: $e");
+      // Handle other types of exceptions
+    }
+  }
+
+  userAddButtonDisable(bool bb) {
+    showadduser = bb;
+    notifyListeners();
+  }
+
+  setaDDUserError(String er) {
+    adduserError = Text(er);
+    notifyListeners();
+  }
+
+/////////////////////////////////////////////////
+  createFloorCardsNew(
+      String date, String cn, String ph, BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    os = await prefs.getString("os");
+
+    try {
+      var res = await SqlConn.readData(
+          "Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
+      var map = jsonDecode(res);
+      // SqlConn.disconnect();
+      if (map.isNotEmpty) {
+        print("newcustomer------------>>$res");
+
+        prefs.setInt("CardID", map[0]['Card_ID']);
+        card_id = map[0]['Card_ID'].toString();
+
+        cardNoctrl.text = map[0]['Card_Name'].toString().trim();
+        setcusnameAndPhone(cn, ph, context);
+        userAddButtonDisable(false);
+        setaDDUserError(" ");
+        typlock = true;
+        // getUsedBags(context, date, card_id);
+        notifyListeners();
+        print(
+            "card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Customer Added ",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('OK'),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
     } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
