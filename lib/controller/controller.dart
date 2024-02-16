@@ -114,6 +114,7 @@ class Controller extends ChangeNotifier {
   bool showadduser = false;
   bool typlock = false;
   bool tapped=false;
+  List printingList=[];
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -675,7 +676,24 @@ class Controller extends ChangeNotifier {
     notifyListeners();
     print("Saved result--$savedresult");
   }
+getprintingFBdetails(String dt,String os,int cardId,int fb) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? os = prefs.getString("os");
 
+    int itemcount = unsavedList.length;
+    print(
+        "printGet ${'Flt_Sp_Get_Fb_Details_Full $fb,$cardId,$os'}");
+    var res = await SqlConn.readData(
+        "Flt_Sp_Get_Fb_Details_Full $fb,$cardId,'$os'");
+    var map = jsonDecode(res);
+    printingList.clear();
+    for (var item in map) {
+      printingList.add(item);
+    }
+ 
+    notifyListeners();
+    print("printing data result--$printingList");
+  }
   discount_calc(int index, String type) {
     if (type == "from add") {
       double srate =

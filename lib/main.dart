@@ -17,6 +17,13 @@ bool isRegistered = false;
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+   
+//  SystemChrome.setPreferredOrientations([
+//     DeviceOrientation.portraitUp,
+//     DeviceOrientation.portraitDown,
+//   ]);
+  // await SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.landscapeRight, DeviceOrientation.landscapeRight]);
   isLoggedIn = await checkLogin();
   isRegistered = await checkRegistration();
   requestPermission();

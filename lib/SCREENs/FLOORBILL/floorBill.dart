@@ -1,5 +1,8 @@
+import 'package:floor_billing/SUNMI/sunmi.dart';
+import 'package:floor_billing/components/printclass.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class FloorBill extends StatefulWidget {
@@ -10,6 +13,14 @@ class FloorBill extends StatefulWidget {
 }
 
 class _FloorBillState extends State<FloorBill> {
+  String date="";
+  @override
+  void initState() {
+    // TODO: implement initState
+     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
+    print("dateeeeeeeeeeeeeee= $date");
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -222,7 +233,18 @@ class _FloorBillState extends State<FloorBill> {
                                   width: 20,
                                 ),
                                 onPressed: () {
-                                  
+                                  Provider.of<Controller>(context, listen: false)
+                              .getprintingFBdetails(date.toString(),value.fbList[index]['Series'],value.fbList[index]['Card_ID'],value.fbList[index]['FB_No']);
+                               PrintReport printer = PrintReport();
+                                  printer.printReport(
+                                      value.printingList);
+                              
+                              
+                              // Navigator.push(
+                              // context,
+                              // MaterialPageRoute(
+                              //     builder: (context) => SunmiHome()),
+                              // );
                                 },
                               )
                             ],
