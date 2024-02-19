@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
+import 'package:floor_billing/SCREENs/FLOORBILL/HOME/mainHome.dart';
 import 'package:floor_billing/SCREENs/db_selection.dart';
 import 'package:floor_billing/MODEL/registration_model.dart';
 import 'package:flutter/services.dart';
@@ -113,8 +114,12 @@ class Controller extends ChangeNotifier {
   List fbList = [];
   bool showadduser = false;
   bool typlock = false;
-  bool tapped=false;
-  List printingList=[];
+  bool tapped = false;
+  List printingList = [];
+  List deliveryBillList = [];
+  Map<int, List<Map<String, dynamic>>> resultList = {};
+  Map<int, List<Map<String, dynamic>>> sortedDelvryList = {};
+ 
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -275,7 +280,7 @@ class Controller extends ChangeNotifier {
         // SqlConn.disconnect();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomeFloorBill()),
+          MaterialPageRoute(builder: (context) => MainHome()),
         );
       } else {
         CustomSnackbar snackbar = CustomSnackbar();
@@ -438,14 +443,15 @@ class Controller extends ChangeNotifier {
                 ],
               );
             },
-          );setBagNo("0");
+          );
+          setBagNo("0");
           slot_id = 0;
-          tapped=true;
+          tapped = true;
           notifyListeners();
         }
       }
-      tapped=false;
-          notifyListeners();
+      tapped = false;
+      notifyListeners();
       print("bag dataaa------------>>$res");
 
       bagDetailsList.clear();
@@ -641,7 +647,7 @@ class Controller extends ChangeNotifier {
       for (int i = 0; i < selectedBarcodeList.length; i++) {
         if (selectedBarcodeList[i]["Barcode"].toString().trim() ==
             selectedBarcode.toString()) {
-          qty[i].text = selectedBarcodeList[i]["Qty"].toString();
+          qty[i].text = "1.0";
           persntage[i].text = selectedBarcodeList[i]["DiscPer"].toString();
           srate = selectedBarcodeList[i]["SRate"];
           notifyListeners();
@@ -676,24 +682,25 @@ class Controller extends ChangeNotifier {
     notifyListeners();
     print("Saved result--$savedresult");
   }
-getprintingFBdetails(String dt,String os,int cardId,int fb) async {
+
+  getprintingFBdetails(String dt, String os, int cardId, int fb) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
 
     int itemcount = unsavedList.length;
-    print(
-        "printGet ${'Flt_Sp_Get_Fb_Details_Full $fb,$cardId,$os'}");
-    var res = await SqlConn.readData(
-        "Flt_Sp_Get_Fb_Details_Full $fb,$cardId,'$os'");
+    print("printGet ${'Flt_Sp_Get_Fb_Details_Full $fb,$cardId,$os'}");
+    var res =
+        await SqlConn.readData("Flt_Sp_Get_Fb_Details_Full $fb,$cardId,'$os'");
     var map = jsonDecode(res);
     printingList.clear();
     for (var item in map) {
       printingList.add(item);
     }
- 
+
     notifyListeners();
     print("printing data result--$printingList");
   }
+
   discount_calc(int index, String type) {
     if (type == "from add") {
       double srate =
@@ -905,6 +912,7 @@ getprintingFBdetails(String dt,String os,int cardId,int fb) async {
 
       debugPrint("Connected!");
       getDatabasename(context, type);
+      // throw TimeoutException(message);
       throw PlatformException(
         code: 'ERROR',
         message: 'Network error IOException: failed to connect...',
@@ -1568,6 +1576,58 @@ getprintingFBdetails(String dt,String os,int cardId,int fb) async {
       }
     }
     print("fbList-----$res");
+    notifyListeners();
+  }
+
+/////////////////////////////////////
+  getDeliveryBillList(int b_no) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? os = await prefs.getString("os");
+
+    print("DeliveryBill para----------$os-----$b_no");
+
+    var res =
+        await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
+    var map = jsonDecode(res);
+    print("deliveryB-----$map");
+    deliveryBillList.clear();
+    sortedDelvryList.clear();
+    if (map != null) {
+      List tempdelvery = [];
+      for (var item in map) {
+        tempdelvery.add(item);
+        notifyListeners();
+      }
+
+      deliveryBillList = tempdelvery.where((map) => map['Paid'] == 1).toList();
+      for (var item in deliveryBillList) {
+        int fbNo = item['Bill_No'];
+
+        if (!sortedDelvryList.containsKey(fbNo)) {
+          sortedDelvryList[fbNo] = [];
+        }
+        sortedDelvryList[fbNo]!.add(item);
+      }
+      resultList=sortedDelvryList;
+    }
+
+    print("deliveryBillList-----$deliveryBillList");
+    print("sortttttt$sortedDelvryList");
+    notifyListeners();
+  }
+
+  searchItem(String key) {
+    if (key != null) {
+      int keyy = int.parse(key);
+      sortedDelvryList.containsKey(keyy);
+      isSearch = true;
+      notifyListeners();
+      resultList[keyy] = sortedDelvryList[keyy]!;
+    } else {
+      isSearch = false;
+      resultList = sortedDelvryList;
+      notifyListeners();
+    }
     notifyListeners();
   }
 

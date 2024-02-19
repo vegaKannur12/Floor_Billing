@@ -266,12 +266,12 @@ class _ItemAddPageState extends State<ItemAddPage> {
                             ],
                           ),
                           const SizedBox(
-                            height: 15,
+                            height: 10,
                           ),
                           Row(
                             children: [
                               SizedBox(
-                                height: 60,
+                                height: 45,
                                 width: 230,
                                 child: GestureDetector(
                                   child: TextFormField(
@@ -389,14 +389,14 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                       child: Column(
                                                         children: [
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Text(
                                                                   "BARCODE      : ${value.selectedBarcodeList[index]["Barcode"].toString()}"),
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Text(
                                                                 "EAN               : ${value.selectedBarcodeList[index]["EAN"].toString()}",
@@ -407,7 +407,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -428,7 +428,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 mainAxisAlignment:
@@ -444,7 +444,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -506,7 +506,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -609,7 +609,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -666,7 +666,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 45,
+                                                            height: 40,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -674,12 +674,12 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                     height: 50,
                                                                     width: 150,
                                                                   ),
-                                                                  SizedBox(
-                                                                      height:
-                                                                          50,
-                                                                      width: 50,
-                                                                      child: value
-                                                                          .salesError)
+                                                                  // SizedBox(
+                                                                  //     height:
+                                                                  //         50,
+                                                                  //     width: 50,
+                                                                  //     child: value
+                                                                  //         .salesError)
                                                                 ],
                                                               ),
                                                             ),
@@ -691,7 +691,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             title: Row(
                                                               children: [
                                                                 SizedBox(
-                                                                    height: 50,
+                                                                    height: 45,
                                                                     width: 150,
                                                                     child: Text(
                                                                       'Net Amount   :',
@@ -736,6 +736,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                               .validate()) {}
                                                                           if (double.parse(value.qty[index].text) <=
                                                                               0.0) {
+                                                                                // print("Quantity can't be null...");
                                                                             CustomSnackbar
                                                                                 snackbar =
                                                                                 CustomSnackbar();
@@ -743,7 +744,20 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                                 context,
                                                                                 "Quantity can't be null...",
                                                                                 "");
-                                                                          } else if (value.slot_id ==
+                                                                          } 
+                                                                          else if(smanContrlr.text.isEmpty)
+                                                                          {
+                                                                            CustomSnackbar
+                                                                                snackbar =
+                                                                                CustomSnackbar();
+                                                                            snackbar.showSnackbar(
+                                                                                context,
+                                                                                "Select salesman...",
+                                                                                "");
+
+                                                                          }
+                                                                          
+                                                                          else if (value.slot_id ==
                                                                               0) {
                                                                             CustomSnackbar
                                                                                 snackbar =
