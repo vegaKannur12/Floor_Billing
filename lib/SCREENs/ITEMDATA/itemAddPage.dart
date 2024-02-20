@@ -209,19 +209,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
               ),
             ],
           ),
-          // bottomNavigationBar: Container(
-          //   padding: EdgeInsets.only(bottom: 20, left: 10, right: 10),
-          //   height: 70,
-          //   width: size.width,
-          //   decoration: BoxDecoration(
-          //     borderRadius: const BorderRadius.only(
-          //       topLeft: Radius.circular(5),
-          //       topRight: Radius.circular(5),
-          //     ),
-          //   ),
-          //   // child: Consumer<Controller>(
-          //   //     builder: (context, value, child) => ),
-          // ),
+         
           body: Consumer<Controller>(
               builder: (context, value, child) => Padding(
                     padding: EdgeInsets.all(5),
@@ -307,7 +295,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               IconButton(
                                 icon: Image.asset(
                                   "assets/search.png",
-                                  color: Colors.black,
+                                 
                                   height: 40,
                                   width: 30,
                                 ),
@@ -327,7 +315,9 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                       value.selectedBarcode.toString() ==
                                           "null") {
                                     ShowBottomSeet(context);
-                                  } else {
+                                  } 
+                                  else 
+                                  {
                                     setState(() {
                                       Provider.of<Controller>(context,
                                               listen: false)
@@ -345,7 +335,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               IconButton(
                                 icon: Image.asset(
                                   "assets/barscan.png",
-                                  color: Colors.black,
+                                 
                                   height: 40,
                                   width: 30,
                                 ),
@@ -355,16 +345,17 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               ),
                             ],
                           ),
-                          value.barcodeinvalid
-                              ? Row(
-                                  children: [
-                                    SizedBox(
-                                        height: 50,
-                                        width: 100,
-                                        child: value.barcodeerror)
-                                  ],
-                                )
-                              : value.showdata
+                          // value.barcodeinvalid
+                          //     ? Row(
+                          //         children: [
+                          //           SizedBox(
+                          //               height: 50,
+                          //               width: 100,
+                          //               child: value.barcodeerror)
+                          //         ],
+                          //       )
+                          //     : 
+                              value.showdata
                                   ? Expanded(
                                       child: Card(
                                         color: Colors.white,
@@ -524,7 +515,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                               () {
                                                                             // value.response[index] = 0;
                                                                             Provider.of<Controller>(context, listen: false).setQty(
-                                                                                1.0,
+                                                                               value.selectedBarcodeList[index]["AllowDecimal"],
                                                                                 index,
                                                                                 "dec");
                                                                           },
@@ -533,7 +524,8 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                             Icons.remove,
                                                                             color:
                                                                                 Colors.red,
-                                                                          )),
+                                                                          )
+                                                                          ),
                                                                       Container(
                                                                         margin: EdgeInsets.only(
                                                                             left:
@@ -583,7 +575,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                               () {
                                                                             // value.response[index] = 0;
                                                                             Provider.of<Controller>(context, listen: false).setQty(
-                                                                                1.0,
+                                                                                value.selectedBarcodeList[index]["AllowDecimal"],
                                                                                 index,
                                                                                 "inc");
                                                                           },
@@ -709,7 +701,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                     )),
                                                                 SizedBox(
                                                                     height: 50,
-                                                                    width: 100,
+                                                                    width: 140,
                                                                     child: value
                                                                             .netamt[
                                                                         index]),

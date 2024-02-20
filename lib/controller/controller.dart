@@ -112,6 +112,7 @@ class Controller extends ChangeNotifier {
   Map<int, List<Map<String, dynamic>>> itemSortedList = {};
   int allbagallcount = 0;
   List fbList = [];
+  List fbResulList = [];
   bool showadduser = false;
   bool typlock = false;
   bool tapped = false;
@@ -119,7 +120,7 @@ class Controller extends ChangeNotifier {
   List deliveryBillList = [];
   Map<int, List<Map<String, dynamic>>> resultList = {};
   Map<int, List<Map<String, dynamic>>> sortedDelvryList = {};
- 
+  List slotIds = [];
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -594,28 +595,24 @@ class Controller extends ChangeNotifier {
 
   getItemDetails(BuildContext context, String barcodedata) async {
     // await initYearsDb(context, "");
-    setBarerror("");
-    notifyListeners();
+    // setBarerror("");
+
     barcodeinvalid = false;
     notifyListeners();
     var res =
         await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os','$barcodedata'");
     var map = jsonDecode(res);
-    if (map.isEmpty) {
-      barcodeinvalid = true;
-      setBarerror("Invalid code");
-      notifyListeners();
-    } else {
+
+    print("Item details Map--$map");
+    // selectedBarcode = "";
+
+    barcodeList.clear();
+    if (map != null) {
       barcodeinvalid = false;
+      setBarerror("");
       notifyListeners();
-      print("Item details Map--$map");
-      // selectedBarcode = "";
-      notifyListeners();
-      barcodeList.clear();
-      if (map != null) {
-        for (var item in map) {
-          barcodeList.add(item);
-        }
+      for (var item in map) {
+        barcodeList.add(item);
       }
 
       if (barcodeList.length == 1) {
@@ -634,8 +631,11 @@ class Controller extends ChangeNotifier {
         setshowdata(true);
         // notifyListeners();
         notifyListeners();
+      } else {
+        barcodeinvalid = true;
+        setBarerror("Invalid code");
+        notifyListeners();
       }
-
       qty = List.generate(
           selectedBarcodeList.length, (index) => TextEditingController());
       persntage = List.generate(
@@ -711,7 +711,7 @@ class Controller extends ChangeNotifier {
       double total = (srate * qua) - ((srate * qua) * disco / 100);
 
       netamt[index] = Text(
-        "${total.toString()}  \u20B9",
+        "${total.toStringAsFixed(2)}  \u20B9",
         style: TextStyle(
             color: Colors.black, fontSize: 20, fontWeight: FontWeight.w600),
       );
@@ -1574,6 +1574,8 @@ class Controller extends ChangeNotifier {
       for (var item in map) {
         fbList.add(item);
       }
+      fbResulList = fbList;
+      isSearch = false;
     }
     print("fbList-----$res");
     notifyListeners();
@@ -1608,7 +1610,7 @@ class Controller extends ChangeNotifier {
         }
         sortedDelvryList[fbNo]!.add(item);
       }
-      resultList=sortedDelvryList;
+      resultList = sortedDelvryList;
     }
 
     print("deliveryBillList-----$deliveryBillList");
@@ -1616,7 +1618,23 @@ class Controller extends ChangeNotifier {
     notifyListeners();
   }
 
+  //////////////////////////////////////
+  getDelivery(int b_no) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? os = await prefs.getString("os");
+
+    print("DeliveryBill para----------$os-----$b_no");
+
+    var res =
+        await SqlConn.readData("Flt_Sp_UpdateBills_For_Delivery '$os',$b_no");
+    var map = jsonDecode(res);
+    print("deliveryBilUpdate-----$map");
+
+    notifyListeners();
+  }
+
   searchItem(String key) {
+    // resultList.clear();
     if (key != null) {
       int keyy = int.parse(key);
       sortedDelvryList.containsKey(keyy);
@@ -1631,6 +1649,30 @@ class Controller extends ChangeNotifier {
     notifyListeners();
   }
 
+  searchCard(String key) {
+    print(key);
+
+    if (key != null) {
+      isSearch = true;
+      notifyListeners();
+      fbResulList = fbList
+          .where((e) =>
+              e["CardNo"].toString().trimLeft().toLowerCase().contains(key.toLowerCase()))
+          .toList();
+     
+      print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy$fbResulList");
+      
+      notifyListeners();
+    } 
+    else 
+    {
+      isSearch = false;
+      fbResulList = fbList;
+      notifyListeners();
+    }
+    notifyListeners();
+  }
+
   ////////////////////////////////////
   setDate(String date1, String date2) {
     fromDate = date1;
@@ -1640,23 +1682,43 @@ class Controller extends ChangeNotifier {
   }
 
   ///////////////////////////////////////////////////////
-  setQty(double val, int index, String type) {
-    if (type == "inc") {
-      double d = double.parse(qty[index].text) + val;
-      qty[index].text = d.toString();
-      discount_calc(index, "from add");
-      notifyListeners();
-    } else if (type == "dec") {
-      if (double.parse(qty[index].text) > 1) {
-        double d = double.parse(qty[index].text) - val;
+  setQty(int allowdec, int index, String type) {
+    if (allowdec == 1) {
+      if (type == "inc") {
+        double d = double.parse(qty[index].text) + 0.25;
         qty[index].text = d.toString();
+        discount_calc(index, "from add");
         notifyListeners();
-      } else {
-        isAdded[index] = false;
+      } else if (type == "dec") {
+        if (double.parse(qty[index].text) > 1) {
+          double d = double.parse(qty[index].text) - 0.25;
+          qty[index].text = d.toString();
+          notifyListeners();
+        } else {
+          isAdded[index] = false;
+          notifyListeners();
+        }
+        discount_calc(index, "from add");
         notifyListeners();
       }
-      discount_calc(index, "from add");
-      notifyListeners();
+    } else {
+      if (type == "inc") {
+        double d = double.parse(qty[index].text) + 1.0;
+        qty[index].text = d.toString();
+        discount_calc(index, "from add");
+        notifyListeners();
+      } else if (type == "dec") {
+        if (double.parse(qty[index].text) > 1) {
+          double d = double.parse(qty[index].text) - 1.0;
+          qty[index].text = d.toString();
+          notifyListeners();
+        } else {
+          isAdded[index] = false;
+          notifyListeners();
+        }
+        discount_calc(index, "from add");
+        notifyListeners();
+      }
     }
   }
 
@@ -1690,6 +1752,12 @@ class Controller extends ChangeNotifier {
     notifyListeners();
     print("getcusnamfon---->$cus_name , $cus_contact");
     print("catlID----$catlID");
+  }
+
+///////////////////////////////////////////
+  setslotID(List l) {
+    slotIds = l;
+    notifyListeners();
   }
 
   /////////////////////////////////////////////////////////////////////

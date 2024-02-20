@@ -14,7 +14,7 @@ class DeliveryBillWidget extends StatefulWidget {
 
 class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
   String date = "";
-  List slotIds = [];
+
   @override
   void initState() {
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
@@ -60,9 +60,9 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                       uniqueSlotIDs.add(item['Slot_ID']);
                     }
                   }
-                  slotIds = uniqueSlotIDs.toList();
+                  value.setslotID(uniqueSlotIDs.toList());
+                  //  value.slotIds = uniqueSlotIDs.toList();
                   Map<String, dynamic> item = list[listIndex];
-
                   return Card(
                     child: ListTile(
                       subtitle: Column(
@@ -82,7 +82,7 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                                     width: 5,
                                   ),
                                   Text(
-                                    item['CardNo'].toString(),
+                                    item['CardNo'].toString().trim(),
                                     // widget.slotname,
                                     style: TextStyle(fontSize: 18),
                                   )
@@ -120,13 +120,14 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
                         height: 50,
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
-                            itemCount: slotIds.length,
+                            itemCount: value.slotIds.length,
                             itemBuilder: (context, index) {
                               return SizedBox(
                                 width: 40,
@@ -140,12 +141,13 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                                       width: 40,
                                     ),
                                     Positioned.fill(
-                                      child: Align(alignment: Alignment.center,
+                                      child: Align(
+                                        alignment: Alignment.center,
                                         child: Text(
-                                          slotIds[index].toString(),
+                                          value.slotIds[index].toString(),
                                           style: TextStyle(
-                                            color: Colors.black,fontWeight: FontWeight.w600
-                                          ),
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w600),
                                         ),
                                       ),
                                     ),
@@ -154,6 +156,33 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                               );
                             }),
                       ),
+                      SizedBox(
+                        height: 40,
+                        width: 100,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // // Provider.of<Controller>(context,
+                            // //         listen: false)
+                            // //     .getLogin(username.text, password.text,
+                            // //         context);
+                             Provider.of<Controller>(context, listen: false)
+                                .getDelivery(key);
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 12, bottom: 12),
+                            child: Text(
+                              "DELIVER",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                  color:
+                                      Theme.of(context).secondaryHeaderColor),
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 ),

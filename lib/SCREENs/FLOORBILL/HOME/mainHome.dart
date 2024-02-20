@@ -15,7 +15,7 @@ class MainHome extends StatefulWidget {
 }
 
 class _MainHomeState extends State<MainHome> {
-  List l = ['Floor Bill', 'Delivery Bill', 'Free/alot Slot', 'Item Search'];
+  List l = ['FLOOR BILL', 'DELIVERY BILL', 'FREE/ALOT SlOT', 'ITEM SEARCH'];
 
   @override
   void initState() {
@@ -47,12 +47,12 @@ class _MainHomeState extends State<MainHome> {
                     child: Container(
                       height: 60,
                       width: 250,
-                      decoration: BoxDecoration(
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.purple,
+                Color.fromARGB(255, 49, 83, 121),
                 Colors.black87,
               ],
               stops: [0.112, 0.789],

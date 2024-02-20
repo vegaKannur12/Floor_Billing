@@ -140,7 +140,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
           // ),
         ],
       ),
-      drawer: DrawerPage(),
+      
       bottomNavigationBar: Consumer<Controller>(
         builder: (BuildContext context, Controller value, Widget? child) {
           return Container(
@@ -431,6 +431,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                   value.userAddButtonDisable(false);
                                   value.ccfon.clear();
                                   value.ccname.clear();
+                                  value.card_id="";
                                   value.setaDDUserError("");
                                 },
                                 icon: Icon(Icons.refresh)),
