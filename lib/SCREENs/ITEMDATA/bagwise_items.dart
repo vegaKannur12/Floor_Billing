@@ -74,7 +74,7 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         Text(
-                          list.first['Slot_Name'].toString(),
+                          list.first['Slot_Name'].toString().trimLeft(),
                           // widget.slotname,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
@@ -92,12 +92,12 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                         print(totl);
                         return Card(
                           child: ListTile(
-                            title: Text(item['Item_Name']),
+                            title: Text(item['Item_Name'].toString().trimLeft()),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  item['Barcode'],
+                                  item['Barcode'].toString().trimLeft(),
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15),

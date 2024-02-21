@@ -121,6 +121,7 @@ class Controller extends ChangeNotifier {
   Map<int, List<Map<String, dynamic>>> resultList = {};
   Map<int, List<Map<String, dynamic>>> sortedDelvryList = {};
   List slotIds = [];
+  bool isvalidsale = false;
   Future<void> sendHeartbeat() async {
     try {
       if (SqlConn.isConnected) {
@@ -272,8 +273,8 @@ class Controller extends ChangeNotifier {
         print(
             "UserID >>>>>> ${valueMap[0]["UserID"]}----Displynam>>>>> ${valueMap[0]["Flt_Display_Name"]}");
         prefs.setString("UserID", valueMap[0]["UserID"].toString());
-        prefs.setString(
-            "Flt_Display_Name", valueMap[0]["Flt_Display_Name"].toString());
+        prefs.setString("Flt_Display_Name",
+            valueMap[0]["Flt_Display_Name"].toString().trimLeft());
         prefs.setString("st_uname", userName);
         prefs.setString("st_pwd", password);
         await getSalesman();
@@ -533,17 +534,19 @@ class Controller extends ChangeNotifier {
   }
 
   searchSalesMan(String smcode) async {
-    bool isvalid = false;
+    isvalidsale = false;
     setSalesrror("");
     notifyListeners();
     print("7777777777777777$smcode");
     for (var sm in salesManlist) {
-      if (sm['Sm_Code'] == smcode) {
-        isvalid = true;
+      if (sm['Sm_Code'].toString().trimLeft() == smcode) {
+        isvalidsale = true;
+        notifyListeners();
         break;
       }
     }
-    if (!isvalid) {
+    print("isvalid===$isvalidsale");
+    if (!isvalidsale) {
       setSalesrror("Invalid");
       notifyListeners();
     }
@@ -593,12 +596,15 @@ class Controller extends ChangeNotifier {
     print("Salesman List--$salesManlist");
   }
 
-  getItemDetails(BuildContext context, String barcodedata) async {
-    // await initYearsDb(context, "");
+ Future<void> getItemDetails(BuildContext context, String barcodedata) async {
+    // await initYearsDb(context, "");nvbnb
     // setBarerror("");
-
+   
+    barcodeinvalid = false;
+    setBarerror("");
     barcodeinvalid = false;
     notifyListeners();
+    try{
     var res =
         await SqlConn.readData("Flt_Sp_Get_Barcode_Item '$os','$barcodedata'");
     var map = jsonDecode(res);
@@ -621,7 +627,7 @@ class Controller extends ChangeNotifier {
         notifyListeners();
 
         for (var item in barcodeList) {
-          var barcode = item['Barcode'];
+          var barcode = item['Barcode'].toString().trim();
           bool barcodeExists = selectedBarcodeList
               .any((element) => element['Barcode'] == barcode);
           if (!barcodeExists) {
@@ -662,15 +668,57 @@ class Controller extends ChangeNotifier {
       print("Selected BarcodeList----^^^___$selectedBarcodeList");
       notifyListeners();
     }
+    }
+     catch (e) {
+      print("An unexpected error occurred: $e");
+      // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        Navigator.pop(context);
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
+    }
   }
 
   savefloorbill(String dt) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
-
+      savedresult.clear();
+notifyListeners();
     int itemcount = unsavedList.length;
-    print(
-        "save floor ${'Flt_Sp_Save_FloorBill $cart_id,$dt,$card_id,$slot_id,$os,$u_id,$unsaved_tot,$itemcount'}");
+    print("save floor ${'Flt_Sp_Save_FloorBill $cart_id,$dt,$card_id,$slot_id,$os,$u_id,$unsaved_tot,$itemcount'}");
     var res = await SqlConn.readData(
         "Flt_Sp_Save_FloorBill $cart_id,'$dt',$card_id,$slot_id,'$os',$u_id,$unsaved_tot,$itemcount");
     var map = jsonDecode(res);
@@ -1265,7 +1313,7 @@ class Controller extends ChangeNotifier {
         prefs.setInt("CardID", map[0]['Card_ID']);
         card_id = map[0]['Card_ID'].toString();
 
-        cardNoctrl.text = map[0]['Card_Name'].toString().trim();
+        cardNoctrl.text = map[0]['Card_Name'].toString().trimLeft();
         setcusnameAndPhone(cn, ph, context);
         userAddButtonDisable(false);
         setaDDUserError(" ");
@@ -1492,6 +1540,8 @@ class Controller extends ChangeNotifier {
       'os ----- $os, cardId ------->$card_id, cart No----------$cart_id',
     );
     // await initYearsDb(context, "");
+    unsavedList.clear();
+    notifyListeners();
     try {
       var res = await SqlConn.readData(
           "Flt_Sp_Get_Unsaved_FBCart '$cart_id','$card_id','$os'");
@@ -1557,7 +1607,15 @@ class Controller extends ChangeNotifier {
       // Handle other types of exceptions
     }
   }
+
 //////////////////////////////////////////////
+  clearCardID() {
+    card_id = "";
+    cardNoctrl.clear();
+    ccfon.clear();
+    ccname.clear();
+    notifyListeners();
+  }
 
   getFBList(String date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1656,16 +1714,17 @@ class Controller extends ChangeNotifier {
       isSearch = true;
       notifyListeners();
       fbResulList = fbList
-          .where((e) =>
-              e["CardNo"].toString().trimLeft().toLowerCase().contains(key.toLowerCase()))
+          .where((e) => e["CardNo"]
+              .toString()
+              .trimLeft()
+              .toLowerCase()
+              .contains(key.toLowerCase()))
           .toList();
-     
+
       print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy$fbResulList");
-      
+
       notifyListeners();
-    } 
-    else 
-    {
+    } else {
       isSearch = false;
       fbResulList = fbList;
       notifyListeners();

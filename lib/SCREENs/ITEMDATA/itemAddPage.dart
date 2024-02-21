@@ -44,6 +44,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
 
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
     print("dateeeeeeeeeeeeeee= $date");
+    Provider.of<Controller>(context, listen: false).setBarerror("");
     //  FunctionUtils.runFunctionPeriodically(context);
     smanfocus.addListener(() async {
       if (!smanfocus.hasFocus) {
@@ -100,8 +101,12 @@ class _ItemAddPageState extends State<ItemAddPage> {
           if (Provider.of<Controller>(context, listen: false)
               .unsavedList
               .isEmpty) {
+            Provider.of<Controller>(context, listen: false)
+                .clearSelectedBarcode(context);
+              Provider.of<Controller>(context, listen: false).cardNoctrl.clear();
             Navigator.pushNamed(context, '/floorhome');
-          } else {
+          } else 
+          {
             _showBackDialog();
           }
         },
@@ -129,78 +134,104 @@ class _ItemAddPageState extends State<ItemAddPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                value.tapped = true;
-                              });
-                            },
-                            child: value.tapped
-                                ? SizedBox(
-                                    height: 60,
-                                    width: 130,
-                                    child: TextFormField(
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                      focusNode: bagFocus,
-                                      controller: bagno,
-                                      onChanged: (val) {},
-                                      onFieldSubmitted: (_) {
-                                        setState(() {
-                                          Provider.of<Controller>(context,
-                                                  listen: false)
-                                              .getBagDetails(
-                                                  bagno.text.toString(),
-                                                  context,
-                                                  "add");
-                                          // tapped = false;
-                                        });
-                                      },
-                                      validator: (text) {
-                                        if (text == null || text.isEmpty) {
-                                          return 'Please Select Bag Number';
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                          errorBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                            color: Colors.white,
-                                          )),
-                                          suffixIcon: IconButton(
-                                            icon: Icon(
-                                              Icons.search,
-                                              color: Colors.white,
-                                            ),
-                                            onPressed: () {
-                                              scanBarcode("bag");
-                                            },
-                                          ),
-                                          hintStyle: TextStyle(
-                                            color: Colors.white,
-                                          ),
-                                          hintText: "Select Bag"),
-                                    ),
-                                  )
-                                : Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.shopping_bag,
-                                        color: Colors.white,
-                                        size: 35,
-                                      ),
-                                      Text(
-                                        "${value.bag_no.toString().toUpperCase()}",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                            color: Colors.white),
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                          badges.Badge(
+                              badgeStyle:
+                                  badges.BadgeStyle(badgeColor: Colors.red),
+                              position: badges.BadgePosition.topEnd(
+                                  top: -5, end: -10),
+                              showBadge: true,
+                              badgeContent: Text(
+                                value.unsavedList.length == null
+                                    ? "0"
+                                    : value.unsavedList.length.toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              child: IconButton(
+                                  onPressed: () {
+                                    Provider.of<Controller>(context,
+                                            listen: false)
+                                        .getUnsavedCart(context);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ViewCartPage()),
+                                    );
+                                  },
+                                  icon: Icon(Icons.shopping_cart,
+                                      color: Colors.white))),
+
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     setState(() {
+                          //       value.tapped = true;
+                          //     });
+                          //   },
+                          //   child: value.tapped
+                          //       ? SizedBox(
+                          //           height: 60,
+                          //           width: 130,
+                          //           child: TextFormField(
+                          //             style: TextStyle(
+                          //               color: Colors.white,
+                          //             ),
+                          //             focusNode: bagFocus,
+                          //             controller: bagno,
+                          //             onChanged: (val) {},
+                          //             onFieldSubmitted: (_) {
+                          //               setState(() {
+                          //                 Provider.of<Controller>(context,
+                          //                         listen: false)
+                          //                     .getBagDetails(
+                          //                         bagno.text.toString(),
+                          //                         context,
+                          //                         "add");
+                          //                 // tapped = false;
+                          //               });
+                          //             },
+                          //             validator: (text) {
+                          //               if (text == null || text.isEmpty) {
+                          //                 return 'Please Select Bag Number';
+                          //               }
+                          //               return null;
+                          //             },
+                          //             decoration: InputDecoration(
+                          //                 errorBorder: UnderlineInputBorder(
+                          //                     borderSide: BorderSide(
+                          //                   color: Colors.white,
+                          //                 )),
+                          //                 suffixIcon: IconButton(
+                          //                   icon: Icon(
+                          //                     Icons.search,
+                          //                     color: Colors.white,
+                          //                   ),
+                          //                   onPressed: () {
+                          //                     scanBarcode("bag");
+                          //                   },
+                          //                 ),
+                          //                 hintStyle: TextStyle(
+                          //                   color: Colors.white,
+                          //                 ),
+                          //                 hintText: "Select Bag"),
+                          //           ),
+                          //         )
+                          //       : Column(
+                          //           mainAxisSize: MainAxisSize.min,
+                          //           children: [
+                          //             Icon(
+                          //               Icons.shopping_bag,
+                          //               color: Colors.white,
+                          //               size: 35,
+                          //             ),
+                          //             Text(
+                          //               "${value.bag_no.toString().toUpperCase()}",
+                          //               style: TextStyle(
+                          //                   fontWeight: FontWeight.bold,
+                          //                   fontSize: 15,
+                          //                   color: Colors.white),
+                          //             ),
+                          //           ],
+                          //         ),
+                          // ),
                         ],
                       ),
                     ),
@@ -209,7 +240,6 @@ class _ItemAddPageState extends State<ItemAddPage> {
               ),
             ],
           ),
-         
           body: Consumer<Controller>(
               builder: (context, value, child) => Padding(
                     padding: EdgeInsets.all(5),
@@ -217,45 +247,6 @@ class _ItemAddPageState extends State<ItemAddPage> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              badges.Badge(
-                                  badgeStyle:
-                                      badges.BadgeStyle(badgeColor: Colors.red),
-                                  position: badges.BadgePosition.topEnd(
-                                      top: -5, end: -10),
-                                  showBadge: true,
-                                  badgeContent: Text(
-                                    value.unsavedList.length == null
-                                        ? "0"
-                                        : value.unsavedList.length.toString(),
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  child: IconButton(
-                                      onPressed: () {
-                                        Provider.of<Controller>(context,
-                                                listen: false)
-                                            .getUnsavedCart(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ViewCartPage()),
-                                        );
-                                      },
-                                      icon: Icon(Icons.shopping_cart))),
-                              Text(
-                                value.card_id.toString(),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
                           Row(
                             children: [
                               SizedBox(
@@ -295,7 +286,6 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               IconButton(
                                 icon: Image.asset(
                                   "assets/search.png",
-                                 
                                   height: 40,
                                   width: 30,
                                 ),
@@ -307,17 +297,15 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                       .getItemDetails(context,
                                           itembarcodctrl.text.toString());
                                   setState(() {});
-                                  if (value.selectedBarcode.toString() == "" ||
-                                      value.selectedBarcode.toString() == " " ||
+                                  if (value.selectedBarcode.toString() == "" &&
+                                      value.selectedBarcode.toString() == " " &&
                                       value.selectedBarcode
                                           .toString()
-                                          .isEmpty ||
+                                          .isEmpty &&
                                       value.selectedBarcode.toString() ==
-                                          "null") {
+                                          "null" ) {
                                     ShowBottomSeet(context);
-                                  } 
-                                  else 
-                                  {
+                                  } else {
                                     setState(() {
                                       Provider.of<Controller>(context,
                                               listen: false)
@@ -335,7 +323,6 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               IconButton(
                                 icon: Image.asset(
                                   "assets/barscan.png",
-                                 
                                   height: 40,
                                   width: 30,
                                 ),
@@ -345,20 +332,30 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               ),
                             ],
                           ),
-                          // value.barcodeinvalid
-                          //     ? Row(
-                          //         children: [
-                          //           SizedBox(
-                          //               height: 50,
-                          //               width: 100,
-                          //               child: value.barcodeerror)
-                          //         ],
-                          //       )
-                          //     : 
-                              value.showdata
+                          value.barcodeinvalid == false &&
+                                  value.selectedBarcodeList.isEmpty
+                              ? Expanded(
+                                  child: Center(
+                                    child: Image.asset(
+                                      "assets/nothing.png",
+                                      height: 70,
+                                      width: 60,
+                                    ),
+                                  ),
+                                )
+                              // ? Row(
+                              //     children: [
+                              //       SizedBox(
+                              //           height: 50,
+                              //           width: 100,
+                              //           child: value.barcodeerror)
+                              //     ],
+                              //   )
+                              : value.showdata &&
+                                      value.selectedBarcodeList.isNotEmpty
                                   ? Expanded(
-                                      child: Card(
-                                        color: Colors.white,
+                                      child: Container(
+                                        color: Colors.orange[50],
                                         child: ListView.builder(
                                             shrinkWrap: true,
                                             itemCount: value
@@ -375,22 +372,23 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                     decoration: BoxDecoration(),
                                                     child: Padding(
                                                       padding:
-                                                          const EdgeInsets.all(
-                                                              5),
+                                                          const EdgeInsets.only(
+                                                              left: 5,
+                                                              right: 5),
                                                       child: Column(
                                                         children: [
                                                           SizedBox(
-                                                            height: 40,
+                                                            height: 35,
                                                             child: ListTile(
                                                               title: Text(
-                                                                  "BARCODE      : ${value.selectedBarcodeList[index]["Barcode"].toString()}"),
+                                                                  "BARCODE      : ${value.selectedBarcodeList[index]["Barcode"].toString().trimLeft()}"),
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 40,
+                                                            height: 35,
                                                             child: ListTile(
                                                               title: Text(
-                                                                "EAN               : ${value.selectedBarcodeList[index]["EAN"].toString()}",
+                                                                "EAN               : ${value.selectedBarcodeList[index]["EAN"].toString().trimLeft()}",
                                                                 overflow:
                                                                     TextOverflow
                                                                         .ellipsis,
@@ -398,7 +396,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 40,
+                                                            height: 35,
                                                             child: ListTile(
                                                               title: Row(
                                                                 children: [
@@ -409,7 +407,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                         "Item Name    : "),
                                                                   ),
                                                                   Text(
-                                                                    "${value.selectedBarcodeList[index]["Item_Name"].toString()}",
+                                                                    "${value.selectedBarcodeList[index]["Item_Name"].toString().trimLeft()}",
                                                                     overflow:
                                                                         TextOverflow
                                                                             .ellipsis,
@@ -419,7 +417,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 40,
+                                                            height: 35,
                                                             child: ListTile(
                                                               title: Row(
                                                                 mainAxisAlignment:
@@ -427,7 +425,11 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                         .spaceBetween,
                                                                 children: [
                                                                   Text(
-                                                                      "SRate             : ${value.selectedBarcodeList[index]["SRate"].toString()}"),
+                                                                    "SRate             : ${value.selectedBarcodeList[index]["SRate"].toStringAsFixed(2)}",
+                                                                    style: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w500),
+                                                                  ),
                                                                   Text(
                                                                       " TAX    :${value.selectedBarcodeList[index]["TaxPer"].toString()} %"),
                                                                 ],
@@ -435,247 +437,206 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                             ),
                                                           ),
                                                           SizedBox(
-                                                            height: 40,
-                                                            child: ListTile(
-                                                              title: Row(
-                                                                children: [
-                                                                  SizedBox(
-                                                                      height:
-                                                                          25,
-                                                                      width:
-                                                                          155,
-                                                                      child: Text(
-                                                                          "Discount        : ")),
-                                                                  Row(
-                                                                    children: [
-                                                                      Container(
-                                                                          height:
-                                                                              40,
-                                                                          width:
-                                                                              50,
-                                                                          color: Colors
-                                                                              .greenAccent,
-                                                                          child:
-                                                                              TextFormField(
-                                                                            controller:
-                                                                                value.persntage[index],
-                                                                            textAlign:
-                                                                                TextAlign.center,
-                                                                            style: TextStyle(
-                                                                                color: Colors.black,
-                                                                                fontSize: 17,
-                                                                                fontWeight: FontWeight.w400),
-                                                                            decoration:
-                                                                                InputDecoration(
-                                                                              contentPadding: EdgeInsets.all(3),
-                                                                              enabledBorder: OutlineInputBorder(
-                                                                                borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
-                                                                              ),
-                                                                              focusedBorder: OutlineInputBorder(
-                                                                                borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
-                                                                              ),
-                                                                            ),
-                                                                            onChanged:
-                                                                                (value) {
-                                                                              Provider.of<Controller>(context, listen: false).discount_calc(index, "from add");
-                                                                            },
-                                                                          )),
-                                                                      Text(
-                                                                        " %",
-                                                                        style: TextStyle(
-                                                                            color: Colors
-                                                                                .black,
-                                                                            fontSize:
-                                                                                22,
-                                                                            fontWeight:
-                                                                                FontWeight.w400),
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
+                                                            height: 5,
                                                           ),
-                                                          SizedBox(
-                                                            height: 40,
-                                                            child: ListTile(
-                                                              title: Row(
+                                                          Container(
+                                                            padding: EdgeInsets.only(top: 8,bottom: 15),
+                                                              decoration: BoxDecoration(
+                                                                  border: Border.all(
+                                                                      color: Colors
+                                                                          .white),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              5),
+                                                                  color: Colors
+                                                                          .orange[
+                                                                      100]),
+                                                              child: Column(
                                                                 children: [
                                                                   SizedBox(
-                                                                      height:
-                                                                          25,
-                                                                      width:
-                                                                          125,
-                                                                      child: Text(
-                                                                          "Quantity         :")),
-                                                                  Row(
-                                                                    children: [
-                                                                      InkWell(
-                                                                          onTap:
-                                                                              () {
-                                                                            // value.response[index] = 0;
-                                                                            Provider.of<Controller>(context, listen: false).setQty(
-                                                                               value.selectedBarcodeList[index]["AllowDecimal"],
-                                                                                index,
-                                                                                "dec");
-                                                                          },
-                                                                          child:
-                                                                              Icon(
-                                                                            Icons.remove,
-                                                                            color:
-                                                                                Colors.red,
-                                                                          )
-                                                                          ),
-                                                                      Container(
-                                                                        margin: EdgeInsets.only(
-                                                                            left:
-                                                                                7,
-                                                                            right:
-                                                                                7),
-                                                                        height:
-                                                                            35,
-                                                                        width:
-                                                                            50,
-                                                                        child:
-                                                                            TextField(
-                                                                          onTap:
-                                                                              () {
-                                                                            value.qty[index].selection =
-                                                                                TextSelection(baseOffset: 0, extentOffset: value.qty[index].value.text.length);
-                                                                          },
-                                                                          onSubmitted:
-                                                                              (val) {},
-                                                                          onChanged:
-                                                                              (val) {},
-                                                                          controller:
-                                                                              value.qty[index],
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style: TextStyle(
-                                                                              color: Colors.black,
-                                                                              fontSize: 17,
-                                                                              fontWeight: FontWeight.w600),
-                                                                          decoration:
-                                                                              InputDecoration(
-                                                                            contentPadding:
-                                                                                EdgeInsets.all(3),
-                                                                            enabledBorder:
-                                                                                OutlineInputBorder(
-                                                                              borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
-                                                                            ),
-                                                                            focusedBorder:
-                                                                                OutlineInputBorder(
-                                                                              borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      InkWell(
-                                                                          onTap:
-                                                                              () {
-                                                                            // value.response[index] = 0;
-                                                                            Provider.of<Controller>(context, listen: false).setQty(
-                                                                                value.selectedBarcodeList[index]["AllowDecimal"],
-                                                                                index,
-                                                                                "inc");
-                                                                          },
-                                                                          child:
-                                                                              Icon(
-                                                                            Icons.add,
-                                                                            color:
-                                                                                Colors.green,
-                                                                          )),
-                                                                    ],
-                                                                  )
-                                                                  // SizedBox(
-                                                                  //     height: 25,
-                                                                  //     width: 40,
-                                                                  //     child: TextFormField(
-                                                                  //       initialValue: value
-                                                                  //           .selectedBarcodeList[
-                                                                  //               index]["Qty"]
-                                                                  //           .toString(),
-                                                                  //     ))
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: 40,
-                                                            child: ListTile(
-                                                              title: Row(
-                                                                children: [
-                                                                  SizedBox(
-                                                                      height:
-                                                                          25,
-                                                                      width:
-                                                                          135,
-                                                                      child: Text(
-                                                                          "Salesman      : ")),
-                                                                  SizedBox(
-                                                                    height: 50,
-                                                                    width: 100,
+                                                                    height: 35,
                                                                     child:
-                                                                        TextFormField(
-                                                                      focusNode:
-                                                                          smanfocus,
-                                                                      controller:
-                                                                          smanContrlr,
-                                                                      onFieldSubmitted:
-                                                                          (val) async {
-                                                                        print(
-                                                                            'sales vaaaaaaaaaaal$val');
-                                                                        await Provider.of<Controller>(context,
-                                                                                listen: false)
-                                                                            .searchSalesMan(val);
-                                                                      },
-                                                                      validator:
-                                                                          (text) {
-                                                                        print(
-                                                                            "$ss");
-                                                                        print(
-                                                                            "object0000000000000$text");
-                                                                        if (text ==
-                                                                                null ||
-                                                                            text.isEmpty) {
-                                                                          return 'Please Select Salesman';
-                                                                        }
+                                                                        ListTile(
+                                                                      title:
+                                                                          Row(
+                                                                        children: [
+                                                                          SizedBox(
+                                                                              height: 25,
+                                                                              width: 155,
+                                                                              child: Text("Discount        : ")),
+                                                                          Row(
+                                                                            children: [
+                                                                              Container(
+                                                                                  height: 40,
+                                                                                  width: 50,
+                                                                                  color: Colors.greenAccent,
+                                                                                  child: TextFormField( keyboardType: TextInputType.phone,
+                                                                                    controller: value.persntage[index],
+                                                                                    textAlign: TextAlign.center,
+                                                                                    style: TextStyle(color: Colors.black, fontSize: 17, fontWeight: FontWeight.w400),
+                                                                                    decoration: InputDecoration(
+                                                                                      contentPadding: EdgeInsets.all(3),
+                                                                                      enabledBorder: OutlineInputBorder(
+                                                                                        borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
+                                                                                      ),
+                                                                                      focusedBorder: OutlineInputBorder(
+                                                                                        borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
+                                                                                      ),
+                                                                                    ),
+                                                                                    onChanged: (value) {
+                                                                                      Provider.of<Controller>(context, listen: false).discount_calc(index, "from add");
+                                                                                    },
+                                                                                  )),
+                                                                              Text(
+                                                                                " %",
+                                                                                style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w400),
+                                                                              )
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 40,
+                                                                    child:
+                                                                        ListTile(
+                                                                      title:
+                                                                          Row(
+                                                                        children: [
+                                                                          SizedBox(
+                                                                              height: 25,
+                                                                              width: 125,
+                                                                              child: Text("Quantity         :")),
+                                                                          Row(
+                                                                            children: [
+                                                                              InkWell(
+                                                                                  onTap: () {
+                                                                                    // value.response[index] = 0;
+                                                                                    Provider.of<Controller>(context, listen: false).setQty(value.selectedBarcodeList[index]["AllowDecimal"], index, "dec");
+                                                                                  },
+                                                                                  child: Icon(
+                                                                                    Icons.remove,
+                                                                                    color: Colors.red,
+                                                                                  )),
+                                                                              Container(
+                                                                                margin: EdgeInsets.only(left: 7, right: 7),
+                                                                                height: 35,
+                                                                                width: 50,
+                                                                                child: TextField( keyboardType: TextInputType.phone,
+                                                                                  onTap: () {
+                                                                                    value.qty[index].selection = TextSelection(baseOffset: 0, extentOffset: value.qty[index].value.text.length);
+                                                                                  },
+                                                                                  onSubmitted: (val) {},
+                                                                                  onChanged: (val) {},
+                                                                                  controller: value.qty[index],
+                                                                                  textAlign: TextAlign.center,
+                                                                                  style: TextStyle(color: Colors.black, fontSize: 17, fontWeight: FontWeight.w600),
+                                                                                  decoration: InputDecoration(
+                                                                                    contentPadding: EdgeInsets.all(3),
+                                                                                    enabledBorder: OutlineInputBorder(
+                                                                                      borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
+                                                                                    ),
+                                                                                    focusedBorder: OutlineInputBorder(
+                                                                                      borderSide: BorderSide(width: 1, color: Colors.grey), //<-- SEE HERE
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              InkWell(
+                                                                                  onTap: () {
+                                                                                    // value.response[index] = 0;
+                                                                                    Provider.of<Controller>(context, listen: false).setQty(value.selectedBarcodeList[index]["AllowDecimal"], index, "inc");
+                                                                                  },
+                                                                                  child: Icon(
+                                                                                    Icons.add,
+                                                                                    color: Colors.green,
+                                                                                  )),
+                                                                            ],
+                                                                          )
+                                                                          // SizedBox(
+                                                                          //     height: 25,
+                                                                          //     width: 40,
+                                                                          //     child: TextFormField(
+                                                                          //       initialValue: value
+                                                                          //           .selectedBarcodeList[
+                                                                          //               index]["Qty"]
+                                                                          //           .toString(),
+                                                                          //     ))
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 40,
+                                                                    child:
+                                                                        ListTile(
+                                                                      title:
+                                                                          Row(
+                                                                        children: [
+                                                                          SizedBox(
+                                                                              height: 25,
+                                                                              width: 135,
+                                                                              child: Text("Salesman      : ")),
+                                                                          SizedBox(
+                                                                            height:
+                                                                                50,
+                                                                            width:
+                                                                                100,
+                                                                            child:
+                                                                                TextFormField(
+                                                                              keyboardType: TextInputType.phone,
+                                                                              focusNode: smanfocus,
+                                                                              controller: smanContrlr,
+                                                                              onFieldSubmitted: (val) async {
+                                                                                print('sales vaaaaaaaaaaal$val');
+                                                                                await Provider.of<Controller>(context, listen: false).searchSalesMan(val);
+                                                                              },
+                                                                              // validator: (text) {
+                                                                              //   print("$ss");
+                                                                              //   print("object0000000000000$text");
+                                                                              //   if (text == null || text.isEmpty) {
+                                                                              //     return 'Please Select Salesman';
+                                                                              //   }
 
-                                                                        return null;
-                                                                      },
-                                                                      decoration: InputDecoration(
-                                                                          errorBorder: UnderlineInputBorder(),
-                                                                          suffixIcon: IconButton(
-                                                                              icon: Icon(Icons.search),
-                                                                              onPressed: () {
-                                                                                scanBarcode("sale");
-                                                                              }),
-                                                                          hintText: "SalesMan"),
+                                                                              //   return null;
+                                                                              // },
+                                                                              decoration: InputDecoration(
+                                                                                  errorBorder: UnderlineInputBorder(),
+                                                                                  suffixIcon: IconButton(
+                                                                                      icon: Icon(Icons.search),
+                                                                                      onPressed: () {
+                                                                                        scanBarcode("sale");
+                                                                                      }),
+                                                                                  hintText: "SalesMan"),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: 40,
-                                                            child: ListTile(
-                                                              title: Row(
-                                                                children: [
-                                                                  SizedBox(
-                                                                    height: 50,
-                                                                    width: 150,
-                                                                  ),
-                                                                  // SizedBox(
-                                                                  //     height:
-                                                                  //         50,
-                                                                  //     width: 50,
-                                                                  //     child: value
-                                                                  //         .salesError)
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
+                                                              )),
+                                                          // SizedBox(
+                                                          //   height: 40,
+                                                          //   child: ListTile(
+                                                          //     title: Row(
+                                                          //       children: [
+                                                          //         SizedBox(
+                                                          //           height: 50,
+                                                          //           width: 150,
+                                                          //         ),
+                                                          //         // SizedBox(
+                                                          //         //     height:
+                                                          //         //         50,
+                                                          //         //     width: 50,
+                                                          //         //     child: value
+                                                          //         //         .salesError)
+                                                          //       ],
+                                                          //     ),
+                                                          //   ),
+                                                          // ),
                                                           Divider(
                                                             thickness: 2,
                                                           ),
@@ -722,13 +683,14 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                       child:
                                                                           ElevatedButton(
                                                                         onPressed:
-                                                                            () {
+                                                                            () async {
+                                                                                await Provider.of<Controller>(context, listen: false).searchSalesMan(smanContrlr.text);
                                                                           if (_formKey
                                                                               .currentState!
                                                                               .validate()) {}
                                                                           if (double.parse(value.qty[index].text) <=
                                                                               0.0) {
-                                                                                // print("Quantity can't be null...");
+                                                                            // print("Quantity can't be null...");
                                                                             CustomSnackbar
                                                                                 snackbar =
                                                                                 CustomSnackbar();
@@ -736,9 +698,9 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                                 context,
                                                                                 "Quantity can't be null...",
                                                                                 "");
-                                                                          } 
-                                                                          else if(smanContrlr.text.isEmpty)
-                                                                          {
+                                                                          } else if (smanContrlr
+                                                                              .text
+                                                                              .isEmpty) {
                                                                             CustomSnackbar
                                                                                 snackbar =
                                                                                 CustomSnackbar();
@@ -746,19 +708,28 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                                 context,
                                                                                 "Select salesman...",
                                                                                 "");
-
-                                                                          }
-                                                                          
-                                                                          else if (value.slot_id ==
-                                                                              0) {
+                                                                          } 
+                                                                          else if(Provider.of<Controller>(context, listen: false).isvalidsale!=true){
                                                                             CustomSnackbar
                                                                                 snackbar =
                                                                                 CustomSnackbar();
                                                                             snackbar.showSnackbar(
                                                                                 context,
-                                                                                "Select a Slot...",
+                                                                                "Salesman Not Exist...",
                                                                                 "");
-                                                                          } else {
+                                                                          }
+                                                                          // else if (value.slot_id <=
+                                                                          //     0) {
+                                                                          //   CustomSnackbar
+                                                                          //       snackbar =
+                                                                          //       CustomSnackbar();
+                                                                          //   snackbar.showSnackbar(
+                                                                          //       context,
+                                                                          //       "Select a Slot...",
+                                                                          //       "");
+                                                                          // }
+                                                                           else {
+                                                                            
                                                                             Provider.of<Controller>(context, listen: false).updateCart(
                                                                                 context,
                                                                                 date,
@@ -838,14 +809,14 @@ class _ItemAddPageState extends State<ItemAddPage> {
                             child: InkWell(
                               child: ListTile(
                                 title: Text(
-                                    "BARCODE : ${value.barcodeList[index]["Barcode"].toString()}"),
+                                    "BARCODE : ${value.barcodeList[index]["Barcode"].toString().trimLeft()}"),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        "EAN : ${value.barcodeList[index]["EAN"].toString()}"),
+                                        "EAN : ${value.barcodeList[index]["EAN"].toString().trimLeft()}"),
                                     Text(
-                                        "Item Name : ${value.barcodeList[index]["Item_Name"].toString()}"),
+                                        "Item Name : ${value.barcodeList[index]["Item_Name"].toString().trimLeft()}"),
                                     Text(
                                         "SRate : ${value.barcodeList[index]["SRate"].toString()}"),
                                   ],

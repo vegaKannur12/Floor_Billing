@@ -63,7 +63,7 @@ class PrintReport {
             align: SunmiPrintAlign.LEFT,
             fontSize: SunmiFontSize.XL));
     await SunmiPrinter.printText(
-        'Slot    :${result[0]["Slot_Name"].toString()}',
+        'Slot    :${result[0]["Slot_Name"].toString().trimLeft()}',
         style: SunmiStyle(
             bold: true,
             align: SunmiPrintAlign.LEFT,
@@ -71,14 +71,14 @@ class PrintReport {
     await SunmiPrinter.lineWrap(1);
 
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    await SunmiPrinter.printBarCode(result[0]["CardNo"].toString(),
+    await SunmiPrinter.printBarCode(result[0]["CardNo"].toString().trimLeft(),
         barcodeType: SunmiBarcodeType.CODE128,
         textPosition: SunmiBarcodeTextPos.NO_TEXT,
         height: 80,
         width: 4);
     await SunmiPrinter.lineWrap(0);
     await SunmiPrinter.printText(
-      "Customer#  ${result[0]["CardNo"].toString()}",
+      "Customer#  ${result[0]["CardNo"].toString().trimLeft()}",
       style: SunmiStyle(
           align: SunmiPrintAlign.CENTER,
           bold: true,
@@ -96,7 +96,7 @@ class PrintReport {
         align: SunmiPrintAlign.LEFT,
       ),
       ColumnMaker(
-        text: result[0]["Cus_Name"].toString(),
+        text: result[0]["Cus_Name"].toString().trimLeft(),
         width: 25,
         align: SunmiPrintAlign.LEFT,
       ),
@@ -148,7 +148,7 @@ class PrintReport {
       await SunmiPrinter.printRow(cols: [
         ColumnMaker(
           // text:"jhdjsdjhdjsdjdhhhhhhhhhhhhhhhhh",
-          text: result[i]["Item_Name"].toString(),
+          text: result[i]["Item_Name"].toString().trimLeft(),
           width: 28,
           align: SunmiPrintAlign.LEFT,
         ),
@@ -162,7 +162,7 @@ class PrintReport {
       await SunmiPrinter.printRow(cols: [
         ColumnMaker(
           text:
-              "${result[i]["Barcode"].toString()} / \u20B9 ${result[i]["Rate"].toStringAsFixed(2)}",
+              "${result[i]["Barcode"].toString().trimLeft()} / \u20B9 ${result[i]["Rate"].toStringAsFixed(2)}",
           width: 40,
           align: SunmiPrintAlign.LEFT,
         ),
@@ -197,21 +197,21 @@ class PrintReport {
     );
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
 
-    await SunmiPrinter.printBarCode(result[0]["CardNo"].toString(),
+    await SunmiPrinter.printBarCode(result[0]["CardNo"].toString().trimLeft(),
         barcodeType: SunmiBarcodeType.CODE128,
         textPosition: SunmiBarcodeTextPos.NO_TEXT,
         height: 80,
         width: 4);
     await SunmiPrinter.lineWrap(0);
     await SunmiPrinter.printText(
-      "No#  ${result[0]["CardNo"].toString()}",
+      "No#  ${result[0]["CardNo"].toString().trimLeft()}",
       style: SunmiStyle(
           align: SunmiPrintAlign.CENTER,
           bold: true,
           fontSize: SunmiFontSize.LG),
     );
     await SunmiPrinter.printText(
-        'Slot    :${result[0]["Slot_Name"].toString()}',
+        'Slot    :${result[0]["Slot_Name"].toString().trimLeft()}',
         style: SunmiStyle(
             bold: true,
             align: SunmiPrintAlign.LEFT,

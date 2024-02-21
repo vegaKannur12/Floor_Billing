@@ -68,7 +68,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                       ],
                     ),
                     Text(
-                      widget.list[index]['Slot_Name'].toString(),
+                      widget.list[index]['Slot_Name'].toString().trimLeft(),
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     )
@@ -92,7 +92,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                               width: 5,
                             ),
                             Text(
-                              widget.list[index]['CardNo'].toString(),
+                              widget.list[index]['CardNo'].toString().trimLeft(),
                               // widget.slotname,
                               style: TextStyle(fontSize: 18),
                             )
@@ -132,7 +132,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                               width: 5,
                             ),
                             Text(
-                              widget.list[index]['Cus_Name'].toString(),
+                              widget.list[index]['Cus_Name'].toString().trimLeft(),
                               // widget.slotname,
                               style: TextStyle(fontSize: 18),
                             )

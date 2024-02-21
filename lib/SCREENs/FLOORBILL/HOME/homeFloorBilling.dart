@@ -31,6 +31,7 @@ class HomeFloorBill extends StatefulWidget {
 
 class _HomeFloorBillState extends State<HomeFloorBill> {
   String date = "";
+
   // TextEditingController cardno = TextEditingController();
   // TextEditingController custname = TextEditingController();
   // TextEditingController custphon = TextEditingController();
@@ -90,6 +91,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -140,7 +142,6 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
           // ),
         ],
       ),
-      
       bottomNavigationBar: Consumer<Controller>(
         builder: (BuildContext context, Controller value, Widget? child) {
           return Container(
@@ -214,7 +215,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                                       child: Text(value
                                                           .usedbagList[index]
                                                               ["Slot_Name"]
-                                                          .toString())),
+                                                          .toString()
+                                                          .trimLeft())),
                                                 ),
                                               ],
                                             ),
@@ -327,34 +329,59 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 const SizedBox(
                   height: 15,
                 ),
-                SizedBox(
-                  height: 60,
-                  child: TextFormField(
-                    ignorePointers: value.showadduser ? true : false,
-                    focusNode: cardfocus,
-                    controller: value.cardNoctrl,
-                    onChanged: (val) {},
-                    validator: (text) {
-                      if (text == null || text.isEmpty) {
-                        return 'Please Select Card Number';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                        errorBorder: UnderlineInputBorder(),
-                        suffixIcon: IconButton(
-                            icon: Icon(Icons.search),
-                            onPressed: () {
-                              scanBarcode("card");
-                            }),
-                        hintText: "Card Number"),
-                  ),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 45,
+                      width: size.width / 1.3,
+                      child: TextFormField(
+                        ignorePointers: value.showadduser ? true : false,
+                        focusNode: cardfocus,
+                        controller: value.cardNoctrl,
+                        onChanged: (val) {},
+                        validator: (text) {
+                          if (text == null || text.isEmpty) {
+                            return 'Please Select Card Number';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              icon: new Icon(Icons.cancel),
+                              onPressed: () {
+                                Provider.of<Controller>(context, listen: false)
+                                    .clearCardID();
+                              },
+                            ),
+                            errorBorder: UnderlineInputBorder(),
+                            // suffixIcon: IconButton(
+                            //     icon: Icon(Icons.search),
+                            //     onPressed: () {
+
+                            //     }),
+                            hintText: "Card Number"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    IconButton(
+                      icon: Image.asset(
+                        "assets/barscan.png",
+                        height: 40,
+                        width: 30,
+                      ),
+                      onPressed: () {
+                        scanBarcode("card");
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   height: 15,
                 ),
                 SizedBox(
-                  height: 55,
+                  height: 45,
                   child: TextFormField(
                     // ignorePointers: value.typlock?true:false,
                     controller: value.ccfon,
@@ -373,7 +400,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   height: 15,
                 ),
                 SizedBox(
-                  height: 55,
+                  height: 45,
                   child: TextFormField(
                     // ignorePointers: value.typlock?true:false,
                     controller: value.ccname,
@@ -431,7 +458,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                   value.userAddButtonDisable(false);
                                   value.ccfon.clear();
                                   value.ccname.clear();
-                                  value.card_id="";
+                                  value.card_id = "";
                                   value.setaDDUserError("");
                                 },
                                 icon: Icon(Icons.refresh)),
@@ -442,37 +469,49 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 const SizedBox(
                   height: 30,
                 ),
-                SizedBox(
-                  height: 60,
-                  child: TextFormField(
-                    focusNode: bagFocus,
-                    controller: bagno,
-                    onFieldSubmitted: (_) {
-                      Provider.of<Controller>(context, listen: false)
-                          .setcusnameAndPhone(
-                              value.ccname.text, value.ccfon.text, context);
-                      Provider.of<Controller>(context, listen: false)
-                          .getBagDetails(
-                              bagno.text.toString(), context, "home");
-                    },
-                    onChanged: (val) {},
-                    // validator: (text) {
-                    //   if (text == null || text.isEmpty) {
-                    //     Provider.of<Controller>(context, listen: false)
-                    //         .setbagerror("Please Select Bag Number");
-                    //   }
-                    //   return null;
-                    // },
-                    decoration: InputDecoration(
-                        errorBorder: UnderlineInputBorder(),
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.search),
-                          onPressed: () {
-                            scanBarcode("bag");
-                          },
-                        ),
-                        hintText: "Bag Number"),
-                  ),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 45,
+                      width: 230,
+                      child: TextFormField(
+                        focusNode: bagFocus,
+                        controller: bagno,
+                        onFieldSubmitted: (_) {
+                          Provider.of<Controller>(context, listen: false)
+                              .setcusnameAndPhone(
+                                  value.ccname.text, value.ccfon.text, context);
+                          Provider.of<Controller>(context, listen: false)
+                              .getBagDetails(
+                                  bagno.text.toString(), context, "home");
+                        },
+                        onChanged: (val) {},
+                        // validator: (text) {
+                        //   if (text == null || text.isEmpty) {
+                        //     Provider.of<Controller>(context, listen: false)
+                        //         .setbagerror("Please Select Bag Number");
+                        //   }
+                        //   return null;
+                        // },
+                        decoration: InputDecoration(
+                            errorBorder: UnderlineInputBorder(),
+                            hintText: "Bag/Slot Number"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    IconButton(
+                      icon: Image.asset(
+                        "assets/barscan.png",
+                        height: 40,
+                        width: 30,
+                      ),
+                      onPressed: () {
+                        scanBarcode("bag");
+                      },
+                    ),
+                  ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -497,32 +536,37 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           //   currentFocus.unfocus();
                           // }
 
-                          // if (bagno.text.toString().isEmpty ||
-                          //     value.card_id.isEmpty) {
-                          //   CustomSnackbar snackbar = CustomSnackbar();
-                          //   snackbar.showSnackbar(
-                          //       context, "Please select Card & Bag ...", "");
-                          // } else {
-                          print("card---->${value.card_id.toString()}");
-                          print("bag---->${value.bag_no.toString()}");
+                          if (bagno.text.toString().isEmpty ||
+                              value.card_id.isEmpty) {
+                            CustomSnackbar snackbar = CustomSnackbar();
+                            snackbar.showSnackbar(
+                                context, "Please select Card & Bag ...", "");
+                          } else if (value.bagDetailsList.isEmpty) {
+                            CustomSnackbar snackbar = CustomSnackbar();
+                            snackbar.showSnackbar(
+                                context, "Choose valid slot...", "");
+                          } else {
+                            print("card---->${value.card_id.toString()}");
+                            print("bag---->${value.bag_no.toString()}");
 
-                          Provider.of<Controller>(context, listen: false)
-                              .getItemDetails(context, value.bag_no.toString());
-                          Provider.of<Controller>(context, listen: false)
-                              .getCart(context);
-                          Provider.of<Controller>(context, listen: false)
-                              .setcusnameAndPhone(
-                                  value.ccname.text, value.ccfon.text, context);
-                          print(
-                              "namee------ ${value.ccname.text},  phone---${value.ccfon.text}");
-                          bagno.clear();
-                          setState(() {});
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ItemAddPage()),
-                          );
-                          // }
+                            Provider.of<Controller>(context, listen: false)
+                                .getItemDetails(
+                                    context, value.bag_no.toString());
+                            Provider.of<Controller>(context, listen: false)
+                                .getCart(context);
+                            Provider.of<Controller>(context, listen: false)
+                                .setcusnameAndPhone(value.ccname.text,
+                                    value.ccfon.text, context);
+                            print(
+                                "namee------ ${value.ccname.text},  phone---${value.ccfon.text}");
+                            bagno.clear();
+                            // setState(() {});
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ItemAddPage()),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -540,7 +584,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                       ),
                     )
                   ],
-                ),
+                )
               ],
             ),
           ),

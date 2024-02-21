@@ -1,3 +1,4 @@
+import 'package:floor_billing/SCREENs/ADDCUST/addcust.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/1deliverybill.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/deliverybill.dart';
@@ -15,7 +16,13 @@ class MainHome extends StatefulWidget {
 }
 
 class _MainHomeState extends State<MainHome> {
-  List l = ['FLOOR BILL', 'DELIVERY BILL', 'FREE/ALOT SlOT', 'ITEM SEARCH'];
+  List l = [
+    'FLOOR BILL',
+    'DELIVERY BILL',
+    'FREE/ALOT SlOT',
+    'ITEM SEARCH',
+    'CREATE CUSTOMER'
+  ];
 
   @override
   void initState() {
@@ -47,17 +54,18 @@ class _MainHomeState extends State<MainHome> {
                     child: Container(
                       height: 60,
                       width: 250,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color.fromARGB(255, 49, 83, 121),
-                Colors.black87,
-              ],
-              stops: [0.112, 0.789],
-            ),),
-                   
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.fromARGB(255, 49, 83, 121),
+                            Colors.black87,
+                          ],
+                          stops: [0.112, 0.789],
+                        ),
+                      ),
                       child: Center(
                         child: Text(
                           l[index].toString(),
@@ -79,6 +87,15 @@ class _MainHomeState extends State<MainHome> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => FirstDeleveryBill()),
+                        );
+                      }
+                      else if (index == 4) {
+                        Provider.of<Controller>(context, listen: false)
+                            .getDeliveryBillList(0);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ADDCUSTOMER()),
                         );
                       }
                     },

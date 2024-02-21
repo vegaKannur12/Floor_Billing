@@ -82,7 +82,7 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                                     width: 5,
                                   ),
                                   Text(
-                                    item['CardNo'].toString().trim(),
+                                    item['CardNo'].toString().trimLeft(),
                                     // widget.slotname,
                                     style: TextStyle(fontSize: 18),
                                   )
