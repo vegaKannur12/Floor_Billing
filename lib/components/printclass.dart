@@ -191,7 +191,7 @@ class PrintReport {
     await SunmiPrinter.line();
     await SunmiPrinter.bold();
     await SunmiPrinter.printText(
-      "FB# ${result[0]["FB_No"].toString()}",
+      "FB#${result[0]["FB_No"].toString()}",
       style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT, bold: true, fontSize: SunmiFontSize.LG),
     );
@@ -211,10 +211,10 @@ class PrintReport {
           fontSize: SunmiFontSize.LG),
     );
     await SunmiPrinter.printText(
-        'Slot    :${result[0]["Slot_Name"].toString().trimLeft()}',
+        'Slot :${result[0]["Slot_Name"].toString().trimLeft()}',
         style: SunmiStyle(
             bold: true,
-            align: SunmiPrintAlign.LEFT,
+            align: SunmiPrintAlign.CENTER,
             fontSize: SunmiFontSize.XL));
   }
 

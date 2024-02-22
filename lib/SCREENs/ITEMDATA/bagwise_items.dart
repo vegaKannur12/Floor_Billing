@@ -1,5 +1,6 @@
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class BagwiseItems extends StatefulWidget {
@@ -30,8 +31,10 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                 )),
       ),
       bottomNavigationBar: Consumer<Controller>(
-        builder: (BuildContext context, Controller value, Widget? child) {
-          return Container(
+        builder: (BuildContext context, Controller value, Widget? child) => value.isbagloading?
+            Container()
+            :
+          Container(
             color: Colors.black,
             height: 40,
             width: size.width,
@@ -48,14 +51,18 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                 ),
               ],
             ),
-          );
-        },
+          )
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Consumer<Controller>(
-          builder: (BuildContext context, Controller value, Widget? child) {
-            return ListView.builder(
+          builder: (BuildContext context, Controller value, Widget? child) =>
+            value.isbagloading?
+            SpinKitCircle(size: 50,color: Colors.blue,)
+            :
+          
+             ListView.builder(
               itemCount: value.itemSortedList.length,
               itemBuilder: (context, index) {
                 totl = 0.0;
@@ -145,8 +152,8 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                   ],
                 );
               },
-            );
-          },
+            )
+          
         ),
       ),
     );

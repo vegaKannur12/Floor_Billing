@@ -82,7 +82,7 @@ class _MainHomeState extends State<MainHome> {
                         );
                       } else if (index == 1) {
                         Provider.of<Controller>(context, listen: false)
-                            .getDeliveryBillList(0);
+                            .getDeliveryBillList(0,context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -90,8 +90,8 @@ class _MainHomeState extends State<MainHome> {
                         );
                       }
                       else if (index == 4) {
-                        Provider.of<Controller>(context, listen: false)
-                            .getDeliveryBillList(0);
+                        // Provider.of<Controller>(context, listen: false)
+                        //     .getDeliveryBillList(0,context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

@@ -21,13 +21,13 @@ class _ViewCartPageState extends State<ViewCartPage> {
     //   if (!smanfocus.hasFocus) {
     //     salespresent();
     //   }
-    // }); 
-  
+    // });
+    Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
   }
 
   @override
   Widget build(BuildContext context) {
-     Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
+    //  Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       extendBody: true,
@@ -68,18 +68,23 @@ class _ViewCartPageState extends State<ViewCartPage> {
           ),
         ],
       ),
-      bottomNavigationBar:Container(
+      bottomNavigationBar: Container(
         padding: EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
         height: 80,
         width: size.width,
         decoration: BoxDecoration(
-          color:Provider.of<Controller>(context, listen: false).unsavedList.length!=0?Colors.white: Colors.amber,
+          color: Provider.of<Controller>(context, listen: false)
+                      .unsavedList
+                      .length !=
+                  0
+              ? Colors.white
+              : Colors.amber,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(5),
             topRight: Radius.circular(5),
           ),
         ),
-        child:Consumer<Controller>(
+        child: Consumer<Controller>(
             builder: (context, value, child) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -97,10 +102,11 @@ class _ViewCartPageState extends State<ViewCartPage> {
                             textStyle: TextStyle(fontSize: 18)),
                         onPressed: () {
                           Provider.of<Controller>(context, listen: false)
-                              .savefloorbill(date.toString());
+                              .savefloorbill(date.toString(),context);
                           Provider.of<Controller>(context, listen: false)
                               .getUsedBagsItems(context, date.toString(), 0);
-                              Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
+                          Provider.of<Controller>(context, listen: false)
+                              .getUnsavedCart(context);
                           showDialog(
                             context: context,
                             builder: (context) {
@@ -131,9 +137,7 @@ class _ViewCartPageState extends State<ViewCartPage> {
                               );
                             },
                           );
-                          setState(() {
-                            
-                          });
+                          setState(() {});
                         },
                         icon: Icon(Icons.shopping_cart),
                         label: Text("SAVE CART"))
@@ -142,7 +146,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
       ),
       body: Consumer<Controller>(
         builder: (BuildContext context, Controller value, Widget? child) {
-          return Column(mainAxisSize: MainAxisSize.min,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               ListView.builder(
                   shrinkWrap: true,
@@ -150,7 +155,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                   itemBuilder: (context, index) {
                     return Padding(
                         padding: const EdgeInsets.all(10),
-                        child: Column(mainAxisSize: MainAxisSize.min,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                                 decoration: BoxDecoration(
@@ -169,7 +175,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                             color: Colors.brown),
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
                                             mainAxisAlignment:
@@ -186,7 +193,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                   Text(
                                                     "${value.unsavedList[index]["Cart_Qty"].toString()} ",
                                                     style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         fontSize: 18),
                                                   ),
                                                   Text("Nos.")
@@ -214,13 +222,15 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                   Text(
                                                     "Total : ",
                                                     style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         fontSize: 22),
                                                   ),
                                                   Text(
                                                     "\u{20B9}${value.unsavedList[index]["Total"].toStringAsFixed(2)}",
                                                     style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         fontSize: 22,
                                                         color: Colors.green),
                                                   ),
@@ -237,27 +247,28 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                             actions: <Widget>[
                                                               new TextButton(
                                                                 onPressed: () {
-                                                                  Navigator.of(context,
+                                                                  Navigator.of(
+                                                                          context,
                                                                           rootNavigator:
                                                                               true)
                                                                       .pop(
                                                                           false); // dismisses only the dialog and returns false
                                                                 },
-                                                                child: Text('No'),
+                                                                child:
+                                                                    Text('No'),
                                                               ),
                                                               TextButton(
                                                                 onPressed: () {
                                                                   Provider.of<Controller>(context, listen: false).updateCart(
                                                                       context,
-                                                                      date.toString(),
+                                                                      date
+                                                                          .toString(),
                                                                       value.unsavedList[index]["Cart_Sm_Code"]
                                                                           .toString(),
                                                                       value.unsavedList[index]
-                                                                          ["Cart_Row"],
-                                                                      value
-                                                                          .unsavedList[index]
-                                                                              [
-                                                                              "Cart_Batch"]
+                                                                          [
+                                                                          "Cart_Row"],
+                                                                      value.unsavedList[index]["Cart_Batch"]
                                                                           .toString()
                                                                           .trim(),
                                                                       double.parse(value
@@ -272,13 +283,15 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                                       1);
                                                                   Provider.of<Controller>(
                                                                           context,
-                                                                          listen: false)
+                                                                          listen:
+                                                                              false)
                                                                       .getUnsavedCart(
                                                                           context);
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
-                                                                child: Text('Yes'),
+                                                                child:
+                                                                    Text('Yes'),
                                                               ),
                                                             ],
                                                           );

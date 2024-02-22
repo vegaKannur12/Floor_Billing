@@ -92,7 +92,9 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                               width: 5,
                             ),
                             Text(
-                              widget.list[index]['CardNo'].toString().trimLeft(),
+                              widget.list[index]['CardNo']
+                                  .toString()
+                                  .trimLeft(),
                               // widget.slotname,
                               style: TextStyle(fontSize: 18),
                             )
@@ -132,7 +134,9 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                               width: 5,
                             ),
                             Text(
-                              widget.list[index]['Cus_Name'].toString().trimLeft(),
+                              widget.list[index]['Cus_Name']
+                                  .toString()
+                                  .trimLeft(),
                               // widget.slotname,
                               style: TextStyle(fontSize: 18),
                             )
@@ -180,9 +184,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                                     height: 30,
                                     width: size.width / 4.2,
                                     decoration: BoxDecoration(
-                                        color: widget.list[index]
-                                                    ['Billed'] ==
-                                                0
+                                        color: widget.list[index]['Billed'] == 0
                                             ? Colors.white
                                             : Colors.amber,
                                         border:
@@ -192,9 +194,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                                   SizedBox(width: 3),
                                   Container(
                                     decoration: BoxDecoration(
-                                        color: widget.list[index]
-                                                    ['Paid'] ==
-                                                0
+                                        color: widget.list[index]['Paid'] == 0
                                             ? Colors.white
                                             : Colors.blue,
                                         border:
@@ -208,11 +208,10 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                                     height: 30,
                                     width: size.width / 4.2,
                                     decoration: BoxDecoration(
-                                        color: widget.list[index]
-                                                    ['Delivered'] ==
-                                                0
-                                            ? Colors.white
-                                            : Colors.green,
+                                        color:
+                                            widget.list[index]['Delivered'] == 0
+                                                ? Colors.white
+                                                : Colors.green,
                                         border:
                                             Border.all(color: Colors.black54)),
                                     child: Center(child: Text("Delivered")),
@@ -227,14 +226,57 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                             width: 20,
                           ),
                           onPressed: () {
-                            Provider.of<Controller>(context, listen: false)
-                                .getprintingFBdetails(
-                                    date.toString(),
-                                    widget.list[index]['Series'],
-                                    widget.list[index]['Card_ID'],
-                                    widget.list[index]['FB_No']);
-                            PrintReport printer = PrintReport();
-                            printer.printReport(value.printingList);
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Want Print ?",
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('No'),
+                                      onPressed: () async {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('Yes'),
+                                      onPressed: () async {
+                                        Provider.of<Controller>(context,
+                                                listen: false)
+                                            .getprintingFBdetails(
+                                                date.toString(),
+                                                widget.list[index]['Series'],
+                                                widget.list[index]['Card_ID'],
+                                                widget.list[index]['FB_No']);
+                                        PrintReport printer = PrintReport();
+                                        printer.printReport(value.printingList);
+
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
                             // Navigator.push(
                             // context,

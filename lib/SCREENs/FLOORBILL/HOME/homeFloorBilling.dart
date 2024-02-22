@@ -64,7 +64,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         Provider.of<Controller>(context, listen: false)
             .getBagDetails(bagno.text.toString(), context, "home");
         Provider.of<Controller>(context, listen: false)
-            .setBagNo(bagno.text.toString());
+            .setBagNo(bagno.text.toString(),context);
       }
     });
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -154,7 +154,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   topRight: Radius.circular(5),
                 ),
               ),
-              child: value.usedbagList.length == 0
+              child: value.usedbagList.length == 0 || value.card_id == "0"
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.only(right: 10),
@@ -288,7 +288,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         builder: (context, value, child) => Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
-            child: Column(
+            child: Column(mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -314,7 +314,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           ),
                           onPressed: () {
                             Provider.of<Controller>(context, listen: false)
-                                .getFBList(date.toString());
+                                .getFBList(date.toString(),context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -349,8 +349,11 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             suffixIcon: IconButton(
                               icon: new Icon(Icons.cancel),
                               onPressed: () {
-                                Provider.of<Controller>(context, listen: false)
-                                    .clearCardID();
+                                setState(() {
+                                  Provider.of<Controller>(context,
+                                          listen: false)
+                                      .clearCardID("0");
+                                });
                               },
                             ),
                             errorBorder: UnderlineInputBorder(),
@@ -381,7 +384,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   height: 15,
                 ),
                 SizedBox(
-                  height: 45,
+                  height: 45,width: size.width / 1.1,
                   child: TextFormField(
                     // ignorePointers: value.typlock?true:false,
                     controller: value.ccfon,
@@ -400,7 +403,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   height: 15,
                 ),
                 SizedBox(
-                  height: 45,
+                  height: 45,width: size.width / 1.1,
                   child: TextFormField(
                     // ignorePointers: value.typlock?true:false,
                     controller: value.ccname,
@@ -417,7 +420,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                 ),
                 value.adduserError,
                 const SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 value.showadduser
                     ? Row(
@@ -439,16 +442,26 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black54),
+                                backgroundColor: Colors.green),
                             child: Padding(
                               padding: const EdgeInsets.only(top: 8, bottom: 8),
-                              child: Text(
-                                "ADD NEW USER",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "NEW",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17,
+                                        color:
+                                            Theme.of(context).secondaryHeaderColor),
+                                  ), 
+                                  SizedBox(width: 5,),
+                                  Image.asset(
+                              "assets/name.png",color: Colors.black,
+                              height: 20,
+                              width: 20,
+                            ),
+                                ],
                               ),
                             ),
                           ),
@@ -460,6 +473,9 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                   value.ccname.clear();
                                   value.card_id = "";
                                   value.setaDDUserError("");
+                                   Provider.of<Controller>(context,
+                                          listen: false)
+                                      .clearCardID("0");
                                 },
                                 icon: Icon(Icons.refresh)),
                           )
@@ -548,15 +564,16 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           } else {
                             print("card---->${value.card_id.toString()}");
                             print("bag---->${value.bag_no.toString()}");
-
-                            Provider.of<Controller>(context, listen: false)
-                                .getItemDetails(
-                                    context, value.bag_no.toString());
-                            Provider.of<Controller>(context, listen: false)
-                                .getCart(context);
-                            Provider.of<Controller>(context, listen: false)
-                                .setcusnameAndPhone(value.ccname.text,
-                                    value.ccfon.text, context);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              // Provider.of<Controller>(context, listen: false)
+                              //     .getItemDetails(
+                              //         context, value.bag_no.toString());
+                              Provider.of<Controller>(context, listen: false)
+                                  .getCart(context);
+                              Provider.of<Controller>(context, listen: false)
+                                  .setcusnameAndPhone(value.ccname.text,
+                                      value.ccfon.text, context);
+                            });
                             print(
                                 "namee------ ${value.ccname.text},  phone---${value.ccfon.text}");
                             bagno.clear();
