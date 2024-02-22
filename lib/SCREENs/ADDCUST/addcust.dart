@@ -29,6 +29,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
   void initState() {
     super.initState();
     // FunctionUtils.runFunctionPeriodically(context);
+    Provider.of<Controller>(context, listen: false).clearCardID("0");
     cardfocus.addListener(() {
       if (!cardfocus.hasFocus) {
         getCustdetails(Provider.of<Controller>(context, listen: false)

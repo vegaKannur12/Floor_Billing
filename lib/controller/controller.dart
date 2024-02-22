@@ -33,7 +33,7 @@ class Controller extends ChangeNotifier {
   ExternalDir externalDir = ExternalDir();
   List<CD> c_d = [];
   String? sof;
-
+ bool incorect=false;
   // ignore: prefer_typing_uninitialized_variables
   var jsonEncoded;
   DateTime d = DateTime.now();
@@ -124,6 +124,7 @@ class Controller extends ChangeNotifier {
   List slotIds = [];
   bool isvalidsale = false;
   bool isbagloading = false;
+  bool igno = false;
   // Future<void> sendHeartbeat() async {
   //   try {
   //     if (SqlConn.isConnected) {
@@ -251,6 +252,8 @@ class Controller extends ChangeNotifier {
 
   //////////////////////////////////////////////////////////
   getLogin(String userName, String password, BuildContext context) async {
+    incorect=false;
+       notifyListeners();
     try {
       isLoginLoading = true;
       notifyListeners();
@@ -284,6 +287,8 @@ class Controller extends ChangeNotifier {
           MaterialPageRoute(builder: (context) => MainHome()),
         );
       } else {
+       incorect=true;
+       notifyListeners();
         CustomSnackbar snackbar = CustomSnackbar();
         snackbar.showSnackbar(context, "Incorrect Username or Password", "");
         isLoginLoading = false;
@@ -393,14 +398,13 @@ class Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  setBagNo(String data,BuildContext context) async {
-    try{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("BagNo", data);
-    bag_no = data;
-    notifyListeners();
-    }
-      on PlatformException catch (e) {
+  setBagNo(String data, BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString("BagNo", data);
+      bag_no = data;
+      notifyListeners();
+    } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
       showDialog(
@@ -445,7 +449,7 @@ class Controller extends ChangeNotifier {
     String? os = prefs.getString("os");
     String? cardNo = prefs.getString("cardNo");
     print('os ----- $os, cardNo ------->$card_id,bagnum----$bagNo');
-    setBagNo(bagNo,context);
+    setBagNo(bagNo, context);
     // await initYearsDb(context, "");
     try {
       print("${'Flt_Sp_Get_Bag $os, $card_id, $bagNo'}");
@@ -453,7 +457,7 @@ class Controller extends ChangeNotifier {
           await SqlConn.readData("Flt_Sp_Get_Bag '$os',$card_id,'$bagNo'");
       var map = jsonDecode(res);
       // SqlConn.disconnect();
-      if (map.isEmpty) {
+      if (map.isEmpty && bagNo.isNotEmpty) {
         if (from == "home") {
           setbagerror("Invalid");
         } else {
@@ -484,7 +488,7 @@ class Controller extends ChangeNotifier {
               );
             },
           );
-          setBagNo("0",context);
+          setBagNo("0", context);
           slot_id = 0;
           tapped = true;
           notifyListeners();
@@ -618,7 +622,7 @@ class Controller extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("SelBar", "");
     selectedBarcode = "";
-
+    setshowdata(false);
     notifyListeners();
   }
 
@@ -642,6 +646,9 @@ class Controller extends ChangeNotifier {
     setBarerror("");
     barcodeinvalid = false;
     selectedBarcodeList.clear();
+
+    clearSelectedBarcode(context);
+
     notifyListeners();
     try {
       var res = await SqlConn.readData(
@@ -679,13 +686,14 @@ class Controller extends ChangeNotifier {
         } else {
           barcodeinvalid = true;
           setBarerror("Invalid code");
+          setshowdata(false);
           notifyListeners();
         }
         qty = List.generate(
             selectedBarcodeList.length, (index) => TextEditingController());
         persntage = List.generate(
             selectedBarcodeList.length, (index) => TextEditingController());
-             smantext = List.generate(
+        smantext = List.generate(
             selectedBarcodeList.length, (index) => TextEditingController());
         netamt =
             List.generate(selectedBarcodeList.length, (index) => Text("0.0"));
@@ -697,7 +705,7 @@ class Controller extends ChangeNotifier {
             qty[i].text = "1.0";
             persntage[i].text = selectedBarcodeList[i]["DiscPer"].toString();
             srate = selectedBarcodeList[i]["SRate"];
-            smantext[i].text="0";
+            smantext[i].text = "0";
             notifyListeners();
             print("sratte ==== $srate");
             discount_calc(i, "from add");
@@ -756,27 +764,30 @@ class Controller extends ChangeNotifier {
     }
   }
 
-  savefloorbill(String dt,BuildContext context) async {
+  savefloorbill(String dt, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
-    try{
-    savedresult.clear();
-    notifyListeners();
-    int itemcount = unsavedList.length;
-    print(
-        "save floor ${'Flt_Sp_Save_FloorBill $cart_id,$dt,$card_id,$slot_id,$os,$u_id,$unsaved_tot,$itemcount'}");
-    var res = await SqlConn.readData(
-        "Flt_Sp_Save_FloorBill $cart_id,'$dt',$card_id,$slot_id,'$os',$u_id,$unsaved_tot,$itemcount");
-    var map = jsonDecode(res);
-    savedresult.clear();
-    for (var item in map) {
-      savedresult.add(item);
-    }
-    unsavedList.clear();
-    notifyListeners();
-    print("Saved result--$savedresult");
-    }
-      on PlatformException catch (e) {
+    try {
+      printingList.clear();
+      savedresult.clear();
+      notifyListeners();
+      int itemcount = unsavedList.length;
+      print(
+          "save floor ${'Flt_Sp_Save_FloorBill $cart_id,$dt,$card_id,$slot_id,$os,$u_id,$unsaved_tot,$itemcount'}");
+      var res = await SqlConn.readData(
+          "Flt_Sp_Save_FloorBill $cart_id,'$dt',$card_id,$slot_id,'$os',$u_id,$unsaved_tot,$itemcount");
+      var map = jsonDecode(res);
+      savedresult.clear();
+      for (var item in map) {
+        savedresult.add(item);
+      }
+      unsavedList.clear();
+      notifyListeners();
+      print("Saved result--$savedresult");
+      await getprintingFBdetails(dt, os!, int.parse(card_id),
+          int.parse(savedresult[0]['FB_no'].toString()));
+      
+    } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
       showDialog(
@@ -818,7 +829,7 @@ class Controller extends ChangeNotifier {
   getprintingFBdetails(String dt, String os, int cardId, int fb) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
-
+    printingList.clear();
     int itemcount = unsavedList.length;
     print("printGet ${'Flt_Sp_Get_Fb_Details_Full $fb,$cardId,$os'}");
     var res =
@@ -1303,7 +1314,9 @@ class Controller extends ChangeNotifier {
     print('os ----- $os, cardNo ------->$cardNo');
     // await initYearsDb(context, "");
     // setcusnameAndPhone(" ", " ", context);
+    igno = false;
     notifyListeners();
+
     try {
       var res = await SqlConn.readData("Flt_Sp_GetFloor_Cards '$os','$cardNo'");
       var map = jsonDecode(res);
@@ -1317,7 +1330,9 @@ class Controller extends ChangeNotifier {
       print("customer Data List ==$custDetailsList");
 
       if (custDetailsList.length == 0) {
+        clearCardID("0");
         setcusnameAndPhone("", "", context);
+        igno = true;
         cardNoctrl.clear();
         userAddButtonDisable(true);
         notifyListeners();
@@ -1332,7 +1347,7 @@ class Controller extends ChangeNotifier {
 
       notifyListeners();
       print("card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
-    }   on PlatformException catch (e) {
+    } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
       showDialog(
@@ -1404,6 +1419,7 @@ class Controller extends ChangeNotifier {
         userAddButtonDisable(false);
         setaDDUserError(" ");
         typlock = true;
+         igno = false;
         // getUsedBags(context, date, card_id);
         notifyListeners();
         print(
@@ -1624,6 +1640,10 @@ class Controller extends ChangeNotifier {
     }
   }
 
+clearunsaved(){
+  unsavedList.clear();
+  notifyListeners();
+}
   ////////////////////////////////////////
   getUnsavedCart(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1772,44 +1792,43 @@ class Controller extends ChangeNotifier {
   }
 
 /////////////////////////////////////
-  getDeliveryBillList(int b_no,BuildContext context) async {
-    try
-    {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? os = await prefs.getString("os");
+  getDeliveryBillList(int b_no, BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? os = await prefs.getString("os");
 
-    print("DeliveryBill para----------$os-----$b_no");
+      print("DeliveryBill para----------$os-----$b_no");
 
-    var res =
-        await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
-    var map = jsonDecode(res);
-    print("deliveryB-----$map");
-    deliveryBillList.clear();
-    sortedDelvryList.clear();
-    if (map != null) {
-      List tempdelvery = [];
-      for (var item in map) {
-        tempdelvery.add(item);
-        notifyListeners();
-      }
-
-      deliveryBillList = tempdelvery.where((map) => map['Paid'] == 1).toList();
-      for (var item in deliveryBillList) {
-        int fbNo = item['Bill_No'];
-
-        if (!sortedDelvryList.containsKey(fbNo)) {
-          sortedDelvryList[fbNo] = [];
+      var res =
+          await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
+      var map = jsonDecode(res);
+      print("deliveryB-----$map");
+      deliveryBillList.clear();
+      sortedDelvryList.clear();
+      if (map != null) {
+        List tempdelvery = [];
+        for (var item in map) {
+          tempdelvery.add(item);
+          notifyListeners();
         }
-        sortedDelvryList[fbNo]!.add(item);
-      }
-      resultList = sortedDelvryList;
-    }
 
-    print("deliveryBillList-----$deliveryBillList");
-    print("sortttttt$sortedDelvryList");
-    notifyListeners();
-  }
-  on PlatformException catch (e) {
+        deliveryBillList =
+            tempdelvery.where((map) => map['Paid'] == 1).toList();
+        for (var item in deliveryBillList) {
+          int fbNo = item['Bill_No'];
+
+          if (!sortedDelvryList.containsKey(fbNo)) {
+            sortedDelvryList[fbNo] = [];
+          }
+          sortedDelvryList[fbNo]!.add(item);
+        }
+        resultList = sortedDelvryList;
+      }
+
+      print("deliveryBillList-----$deliveryBillList");
+      print("sortttttt$sortedDelvryList");
+      notifyListeners();
+    } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
       showDialog(
@@ -1849,18 +1868,60 @@ class Controller extends ChangeNotifier {
   }
 
   //////////////////////////////////////
-  getDelivery(int b_no) async {
+  getDelivery(int b_no,BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = await prefs.getString("os");
-
+    try{
     print("DeliveryBill para----------$os-----$b_no");
 
     var res =
         await SqlConn.readData("Flt_Sp_UpdateBills_For_Delivery '$os',$b_no");
     var map = jsonDecode(res);
     print("deliveryBilUpdate-----$map");
-
+     deliveryBillList.clear();
     notifyListeners();
+    }
+    on PlatformException catch (e) {
+      print("PlatformException occurredcttr: $e");
+      // await SqlConn.disconnect();
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Not Connected.! ",
+                  style: TextStyle(fontSize: 18),
+                ),
+                SpinKitCircle(
+                  color: Colors.green,
+                )
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Connect'),
+                onPressed: () async {
+                  await initYearsDb(context, "");
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      print(e);
+      return null;
+    } catch (e) {
+      print("An unexpected error occurred: $e");
+      // Handle other types of exceptions
+    }
+
   }
 
   searchItem(String key) {

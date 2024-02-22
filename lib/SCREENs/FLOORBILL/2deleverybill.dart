@@ -1,3 +1,4 @@
+import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -34,163 +35,169 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
           int key = value.resultList.keys.elementAt(index);
           List<Map<String, dynamic>> list = value.resultList[key]!;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '$key',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: ClampingScrollPhysics(),
-                itemCount: list.length,
-                itemBuilder: (context, listIndex) {
-                  // slotIds = list.map((map) => map["Slot_ID"]).toList();
-                  // slotIds=getUniqueSlotIDs(lb);
-                  Set<int> uniqueSlotIDs = Set<int>();
-                  for (var item in list) {
-                    if (item.containsKey('Slot_ID')) {
-                      uniqueSlotIDs.add(item['Slot_ID']);
-                    }
-                  }
-                  value.setslotID(uniqueSlotIDs.toList());
-                  //  value.slotIds = uniqueSlotIDs.toList();
-                  Map<String, dynamic> item = list[listIndex];
-                  return Card(
-                    child: ListTile(
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    "assets/card.png",
-                                    height: 20,
-                                    width: 20,
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    item['CardNo'].toString().trimLeft(),
-                                    // widget.slotname,
-                                    style: TextStyle(fontSize: 18),
-                                  )
-                                ],
-                              ),
-                              Text("FB# ${item['Fb_No'].toString()}")
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Image.asset(
-                                "assets/card.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "\u20B9 ${item['Amount'].toStringAsFixed(2)}",
-                                // widget.slotname,
-                                style: TextStyle(fontSize: 18),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      // Add more information if needed
-                    ),
-                  );
-                },
-              ),
-              Card(
-                color: Colors.blueGrey,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 15),
+          return Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        height: 50,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: value.slotIds.length,
-                            itemBuilder: (context, index) {
-                              return SizedBox(
-                                width: 40,
-                                height: 50,
-                                child: Stack(
-                                  children: [
-                                    Image.asset(
-                                      "assets/bagimg.png",
-                                      color: Colors.yellow,
-                                      height: 40,
-                                      width: 40,
-                                    ),
-                                    Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          value.slotIds[index].toString(),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
+                      Text(
+                        'BillNo# $key \u20B9',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
                       ),
-                      SizedBox(
-                        height: 40,
-                        width: 100,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // // Provider.of<Controller>(context,
-                            // //         listen: false)
-                            // //     .getLogin(username.text, password.text,
-                            // //         context);
-                             Provider.of<Controller>(context, listen: false)
-                                .getDelivery(key);
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 12, bottom: 12),
-                            child: Text(
-                              "DELIVER",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                  color:
-                                      Theme.of(context).secondaryHeaderColor),
-                            ),
-                          ),
-                        ),
-                      )
+                      Row(
+                        children: [
+                          Text(
+                            "\u20B9 ${list[0]['Amount'].toStringAsFixed(2)}",
+                            // widget.slotname,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
+                SizedBox(height: 8),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  itemCount: list.length,
+                  itemBuilder: (context, listIndex) {
+                    // slotIds = list.map((map) => map["Slot_ID"]).toList();
+                    // slotIds=getUniqueSlotIDs(lb);
+                    Set<int> uniqueSlotIDs = Set<int>();
+                    for (var item in list) {
+                      if (item.containsKey('Slot_ID')) {
+                        uniqueSlotIDs.add(item['Slot_ID']);
+                      }
+                    }
+                    
+                    value.setslotID(uniqueSlotIDs.toList());
+                    //  value.slotIds = uniqueSlotIDs.toList();
+                    Map<String, dynamic> item = list[listIndex];
+                    return Container(
+                      height: 40,
+                      child: ListTile(
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.asset(
+                                      "assets/card.png",
+                                      height: 20,
+                                      width: 20,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      item['CardNo'].toString().trimLeft(),
+                                      // widget.slotname,
+                                      style: TextStyle(fontSize: 18),
+                                    )
+                                  ],
+                                ),
+                                Text("FB# ${item['Fb_No'].toString()}")
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Add more information if needed
+                      ),
+                    );
+                  },
+                ),
+                Card(
+                  color: Colors.blueGrey,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: value.slotIds.length,
+                              itemBuilder: (context, index) {
+                                return SizedBox(
+                                  width: 40,
+                                  height: 50,
+                                  child: Stack(
+                                    children: [
+                                      Image.asset(
+                                        "assets/bagimg.png",
+                                        color: Colors.yellow,
+                                        height: 40,
+                                        width: 40,
+                                      ),
+                                      Positioned.fill(
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            value.slotIds[index].toString(),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                        ),
+                        SizedBox(
+                          height: 40,
+                          width: 100,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // // Provider.of<Controller>(context,
+                              // //         listen: false)
+                              // //     .getLogin(username.text, password.text,
+                              // //         context);
+                              Provider.of<Controller>(context, listen: false)
+                                  .getDelivery(key, context);
+                              CustomSnackbar snackbar = CustomSnackbar();
+                              snackbar.showSnackbar(
+                                  context, "Item Delevered...", "");
+                            },
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 12, bottom: 12),
+                              child: Text(
+                                "DELIVER",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
           );
         },
       ),

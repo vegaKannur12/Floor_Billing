@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:floor_billing/DRAWER/drawerPage.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/deliverybill.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/floorBill.dart';
@@ -31,7 +33,7 @@ class HomeFloorBill extends StatefulWidget {
 
 class _HomeFloorBillState extends State<HomeFloorBill> {
   String date = "";
-
+  final _formKey = GlobalKey<FormState>();
   // TextEditingController cardno = TextEditingController();
   // TextEditingController custname = TextEditingController();
   // TextEditingController custphon = TextEditingController();
@@ -40,6 +42,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   TextEditingController rate = TextEditingController();
   FocusNode cardfocus = FocusNode();
   FocusNode bagFocus = FocusNode();
+  FocusNode fonfocus = FocusNode();
   String _scanBarcode = 'Unknown';
   String ep = "";
 
@@ -47,6 +50,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   void initState() {
     super.initState();
     // FunctionUtils.runFunctionPeriodically(context);
+    Provider.of<Controller>(context, listen: false).clearCardID("0");
     cardfocus.addListener(() {
       if (!cardfocus.hasFocus) {
         getCustdetails(Provider.of<Controller>(context, listen: false)
@@ -64,9 +68,17 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         Provider.of<Controller>(context, listen: false)
             .getBagDetails(bagno.text.toString(), context, "home");
         Provider.of<Controller>(context, listen: false)
-            .setBagNo(bagno.text.toString(),context);
+            .setBagNo(bagno.text.toString(), context);
       }
     });
+    // fonfocus.addListener(() {
+    //   if (Provider.of<Controller>(context, listen: false).ccfon.text.length !=
+    //       10)
+    //   {
+    //     CustomSnackbar snackbar = CustomSnackbar();
+    //     snackbar.showSnackbar(context, "Enter valid contact...", "");
+    //   }
+    // });
     // WidgetsBinding.instance.addPostFrameCallback((_) {
 
     // });
@@ -85,6 +97,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   void dispose() {
     cardfocus.removeListener(() {});
     bagFocus.removeListener(() {});
+    fonfocus.removeListener(() {});
     super.dispose();
   }
 
@@ -288,7 +301,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         builder: (context, value, child) => Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
-            child: Column(mainAxisAlignment: MainAxisAlignment.start,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -314,7 +328,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           ),
                           onPressed: () {
                             Provider.of<Controller>(context, listen: false)
-                                .getFBList(date.toString(),context);
+                                .getFBList(date.toString(), context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -340,10 +354,10 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                         controller: value.cardNoctrl,
                         onChanged: (val) {},
                         validator: (text) {
-                          if (text == null || text.isEmpty) {
-                            return 'Please Select Card Number';
-                          }
-                          return null;
+                          // if (text == null || text.isEmpty) {
+                          //   return 'Please Select Card Number';
+                          // }
+                          // return null;
                         },
                         decoration: InputDecoration(
                             suffixIcon: IconButton(
@@ -353,6 +367,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                   Provider.of<Controller>(context,
                                           listen: false)
                                       .clearCardID("0");
+                                      bagno.clear();
                                 });
                               },
                             ),
@@ -360,7 +375,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             // suffixIcon: IconButton(
                             //     icon: Icon(Icons.search),
                             //     onPressed: () {
-
+    
                             //     }),
                             hintText: "Card Number"),
                       ),
@@ -384,9 +399,27 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   height: 15,
                 ),
                 SizedBox(
-                  height: 45,width: size.width / 1.1,
+                  height: 45,
+                  width: size.width / 1.1,
                   child: TextFormField(
+                    focusNode: fonfocus,
                     // ignorePointers: value.typlock?true:false,
+                    onFieldSubmitted: (value) {
+                      if (value.length != 10) {
+                        CustomSnackbar snackbar = CustomSnackbar();
+                        snackbar.showSnackbar(
+                            context, "Enter valid contact...", "");
+                      }
+                    },
+                    keyboardType: TextInputType.phone,
+                    validator: (text) {
+                      if (text == null || text.isEmpty) {
+                        return 'Please Enter Phone Number';
+                      } else if (text.length != 10) {
+                        return 'Please Enter Valid Phone No ';
+                      }
+                      return null;
+                    },
                     controller: value.ccfon,
                     onChanged: (val) {},
                     decoration: InputDecoration(
@@ -403,7 +436,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                   height: 15,
                 ),
                 SizedBox(
-                  height: 45,width: size.width / 1.1,
+                  height: 45,
+                  width: size.width / 1.1,
                   child: TextFormField(
                     // ignorePointers: value.typlock?true:false,
                     controller: value.ccname,
@@ -452,15 +486,18 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 17,
-                                        color:
-                                            Theme.of(context).secondaryHeaderColor),
-                                  ), 
-                                  SizedBox(width: 5,),
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor),
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
                                   Image.asset(
-                              "assets/name.png",color: Colors.black,
-                              height: 20,
-                              width: 20,
-                            ),
+                                    "assets/name.png",
+                                    color: Colors.black,
+                                    height: 20,
+                                    width: 20,
+                                  ),
                                 ],
                               ),
                             ),
@@ -473,7 +510,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                   value.ccname.clear();
                                   value.card_id = "";
                                   value.setaDDUserError("");
-                                   Provider.of<Controller>(context,
+                                  Provider.of<Controller>(context,
                                           listen: false)
                                       .clearCardID("0");
                                 },
@@ -491,6 +528,11 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                       height: 45,
                       width: 230,
                       child: TextFormField(
+                        ignorePointers: value.igno ||
+                                value.ccname.text.isEmpty ||
+                                value.ccfon.text.isEmpty
+                            ? true
+                            : false,
                         focusNode: bagFocus,
                         controller: bagno,
                         onFieldSubmitted: (_) {
@@ -547,11 +589,11 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                       child: ElevatedButton(
                         onPressed: () {
                           // FocusScopeNode currentFocus = FocusScope.of(context);
-
+    
                           // if (!currentFocus.hasPrimaryFocus) {
                           //   currentFocus.unfocus();
                           // }
-
+    
                           if (bagno.text.toString().isEmpty ||
                               value.card_id.isEmpty) {
                             CustomSnackbar snackbar = CustomSnackbar();
@@ -561,6 +603,15 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             CustomSnackbar snackbar = CustomSnackbar();
                             snackbar.showSnackbar(
                                 context, "Choose valid slot...", "");
+                          } else if (Provider.of<Controller>(context,
+                                      listen: false)
+                                  .ccfon
+                                  .text
+                                  .length !=
+                              10) {
+                            CustomSnackbar snackbar = CustomSnackbar();
+                            snackbar.showSnackbar(
+                                context, "Enter valid contact...", "");
                           } else {
                             print("card---->${value.card_id.toString()}");
                             print("bag---->${value.bag_no.toString()}");
@@ -581,7 +632,10 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ItemAddPage()),
+                                  builder: (context) => ItemAddPage(
+                                        cardno: value.cardNoctrl.text,
+                                        bagno: value.bag_no.toString(),
+                                      )),
                             );
                           }
                         },

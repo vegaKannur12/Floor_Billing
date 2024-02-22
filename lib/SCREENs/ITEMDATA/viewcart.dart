@@ -1,10 +1,13 @@
+import 'package:floor_billing/components/printclass.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ViewCartPage extends StatefulWidget {
-  const ViewCartPage({super.key});
+  final String cardno;
+  final String bagno;
+  ViewCartPage({super.key, required this.cardno, required this.bagno});
 
   @override
   State<ViewCartPage> createState() => _ViewCartPageState();
@@ -54,11 +57,9 @@ class _ViewCartPageState extends State<ViewCartPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        value.card_id.toString().toUpperCase(),
+                        "${widget.cardno.toString()}/${widget.bagno.toString()}",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            fontSize: 20),
+                            fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ],
                   ),
@@ -91,8 +92,9 @@ class _ViewCartPageState extends State<ViewCartPage> {
                     Text(
                       "\u{20B9} ${value.unsaved_tot.toStringAsFixed(2)}",
                       style: TextStyle(
-                        color: Colors.black,
-                      ),
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900),
                     ),
                     ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
@@ -102,7 +104,7 @@ class _ViewCartPageState extends State<ViewCartPage> {
                             textStyle: TextStyle(fontSize: 18)),
                         onPressed: () {
                           Provider.of<Controller>(context, listen: false)
-                              .savefloorbill(date.toString(),context);
+                              .savefloorbill(date.toString(), context);
                           Provider.of<Controller>(context, listen: false)
                               .getUsedBagsItems(context, date.toString(), 0);
                           Provider.of<Controller>(context, listen: false)
@@ -116,7 +118,7 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Item saved",
+                                      "Want Print ?",
                                       style: TextStyle(fontSize: 18),
                                     ),
                                   ],
@@ -128,9 +130,31 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                           .textTheme
                                           .labelLarge,
                                     ),
-                                    child: const Text('Ok'),
+                                    child: const Text('No'),
                                     onPressed: () async {
-                                      Navigator.of(context).pop();
+                                      Provider.of<Controller>(context,
+                                              listen: false)
+                                          .clearCardID("0");
+                                      Navigator.pushNamed(
+                                          context, '/floorhome');
+                                      // Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      textStyle: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge,
+                                    ),
+                                    child: const Text('Yes'),
+                                    onPressed: () async {
+                                      PrintReport printer = PrintReport();
+                                      printer.printReport(value.printingList);
+                                      Provider.of<Controller>(context,
+                                              listen: false)
+                                          .clearCardID("0");
+                                      Navigator.pushNamed(
+                                          context, '/floorhome');
                                     },
                                   ),
                                 ],
@@ -197,7 +221,6 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                             FontWeight.bold,
                                                         fontSize: 18),
                                                   ),
-                                                  Text("Nos.")
                                                 ],
                                               ),
                                             ],

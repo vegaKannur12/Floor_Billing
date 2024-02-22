@@ -113,7 +113,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/floorhome': (context) => HomeFloorBill(),
-        '/cart': (context) => ViewCartPage(),
+        // '/cart': (context) => ViewCartPage(),
       },
       home: SplashScreen(),
       // LoginPage(),
