@@ -17,12 +17,14 @@ class _DeliveryBillState extends State<DeliveryBill> {
   List slotIds = [];
   Set<int> uniqueSlotIDs = Set<int>();
   @override
-  void initState() {
-    date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
+   void initState() {
+    // TODO: implement initState
+     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
     print("dateeeeeeeeeeeeeee= $date");
+       Provider.of<Controller>(context, listen: false).getDeliveryBillList(0,context);
     super.initState();
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;

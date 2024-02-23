@@ -15,6 +15,7 @@ class ViewCartPage extends StatefulWidget {
 
 class _ViewCartPageState extends State<ViewCartPage> {
   String date = "";
+   bool _printDialogShown = false; 
   void initState() {
     super.initState();
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
@@ -109,6 +110,7 @@ class _ViewCartPageState extends State<ViewCartPage> {
                               .getUsedBagsItems(context, date.toString(), 0);
                           Provider.of<Controller>(context, listen: false)
                               .getUnsavedCart(context);
+                               if (!_printDialogShown) {
                           showDialog(
                             context: context,
                             builder: (context) {
@@ -135,9 +137,10 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                       Provider.of<Controller>(context,
                                               listen: false)
                                           .clearCardID("0");
+                                          Navigator.pop(context);
                                       Navigator.pushNamed(
                                           context, '/floorhome');
-                                      // Navigator.of(context).pop();
+                                      
                                     },
                                   ),
                                   TextButton(
@@ -148,20 +151,24 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                     ),
                                     child: const Text('Yes'),
                                     onPressed: () async {
-                                      PrintReport printer = PrintReport();
-                                      printer.printReport(value.printingList);
                                       Provider.of<Controller>(context,
                                               listen: false)
                                           .clearCardID("0");
+                                      PrintReport printer = PrintReport();
+                                      printer.printReport(value.printingList);
+                                      Navigator.pop(context);
                                       Navigator.pushNamed(
                                           context, '/floorhome');
+                                         
                                     },
                                   ),
                                 ],
                               );
                             },
                           );
-                          setState(() {});
+                          _printDialogShown = true;
+                        }
+                          // setState(() {});
                         },
                         icon: Icon(Icons.shopping_cart),
                         label: Text("SAVE CART"))

@@ -1,9 +1,9 @@
+import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/components/textfldCommon.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -126,15 +126,15 @@ class _LoginPageState extends State<LoginPage> {
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      // Provider.of<Controller>(context,
-                                      //         listen: false)
-                                      //     .getLogin(username.text, password.text,
-                                      //         context);
-                                             //commnted
-                                       Provider.of<Controller>(context, listen: false)
-                                          .getLogin(
-                                              'floor4','997', context);
-                                              
+                                      Provider.of<Controller>(context,
+                                              listen: false)
+                                          .getLogin(username.text,
+                                              password.text, context);
+                                     
+                                      //commnted
+                                      //  Provider.of<Controller>(context, listen: false)
+                                      //     .getLogin(
+                                      //         'floor4','997', context);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:

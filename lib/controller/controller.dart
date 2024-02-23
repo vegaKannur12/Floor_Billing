@@ -270,7 +270,7 @@ class Controller extends ChangeNotifier {
           "Flt_Sp_Verify_User '$os','$userName','$password'");
       var valueMap = json.decode(res);
       print("item list----------$res");
-      if (valueMap != null) {
+      if (valueMap.isNotEmpty) {
         print("user dataa----------$res");
         print(
             "UserID >>>>>> ${valueMap[0]["UserID"]}----Displynam>>>>> ${valueMap[0]["Flt_Display_Name"]}");
@@ -830,6 +830,7 @@ class Controller extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = prefs.getString("os");
     printingList.clear();
+    notifyListeners();
     int itemcount = unsavedList.length;
     print("printGet ${'Flt_Sp_Get_Fb_Details_Full $fb,$cardId,$os'}");
     var res =
@@ -842,6 +843,10 @@ class Controller extends ChangeNotifier {
 
     notifyListeners();
     print("printing data result--$printingList");
+  }
+  clearprintList()
+  {
+
   }
 
   discount_calc(int index, String type) {
@@ -1793,7 +1798,9 @@ clearunsaved(){
 
 /////////////////////////////////////
   getDeliveryBillList(int b_no, BuildContext context) async {
-    try {
+    try {deliveryBillList.clear();
+      sortedDelvryList.clear();
+      resultList.clear();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? os = await prefs.getString("os");
 
@@ -1822,6 +1829,7 @@ clearunsaved(){
           }
           sortedDelvryList[fbNo]!.add(item);
         }
+        
         resultList = sortedDelvryList;
       }
 
@@ -1932,7 +1940,9 @@ clearunsaved(){
       isSearch = true;
       notifyListeners();
       resultList[keyy] = sortedDelvryList[keyy]!;
-    } else {
+    } 
+    else 
+    {
       isSearch = false;
       resultList = sortedDelvryList;
       notifyListeners();

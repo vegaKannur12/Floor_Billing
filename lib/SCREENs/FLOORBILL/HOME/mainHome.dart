@@ -15,13 +15,21 @@ class MainHome extends StatefulWidget {
   State<MainHome> createState() => _MainHomeState();
 }
 
+class Menus {
+  final String iconname;
+  final String iconimg;
+  Menus({required this.iconname, required this.iconimg});
+}
+
 class _MainHomeState extends State<MainHome> {
-  List l = [
-    'FLOOR BILL',
-    'DELIVERY BILL',
-    'FREE/ALOT SlOT',
-    'ITEM SEARCH',
-    'CREATE CUSTOMER'
+  List<Menus> l = [
+    Menus(iconname: 'CREATE CUSTOMER', iconimg: 'assets/Cus.png'),
+    Menus(iconname: 'FLOOR BILL', iconimg: 'assets/Fb.png'),
+    Menus(iconname: 'DELIVERY BILL', iconimg: 'assets/Del.png'),
+  // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
+  // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
+  // Menus(iconname: 'ITEM SEARCH', iconimg: 'assets/lock.png'),
+  
   ];
 
   @override
@@ -36,7 +44,7 @@ class _MainHomeState extends State<MainHome> {
     return SafeArea(
         child: Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.amber,
       // appBar: AppBar(
       //   backgroundColor: Colors.yellow,
       //   elevation: 0,
@@ -52,10 +60,12 @@ class _MainHomeState extends State<MainHome> {
                 children: [
                   InkWell(
                     child: Container(
-                      height: 60,
-                      width: 250,
+                      height: 100,
+                      width: 280,
+                     
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
+                         color: Colors.amber,
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -67,29 +77,25 @@ class _MainHomeState extends State<MainHome> {
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          l[index].toString(),
-                          style: TextStyle(color: Colors.white),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 40,width: 40,
+                                child: Image.asset(l[index].iconimg.toString(),)),
+                                SizedBox(width: 20,),
+                              Text(
+                                l[index].iconname.toString(),
+                                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     onTap: () {
                       if (index == 0) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HomeFloorBill()),
-                        );
-                      } else if (index == 1) {
-                        Provider.of<Controller>(context, listen: false)
-                            .getDeliveryBillList(0,context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FirstDeleveryBill()),
-                        );
-                      }
-                      else if (index == 4) {
                         // Provider.of<Controller>(context, listen: false)
                         //     .getDeliveryBillList(0,context);
                         Navigator.push(
@@ -98,6 +104,21 @@ class _MainHomeState extends State<MainHome> {
                               builder: (context) => ADDCUSTOMER()),
                         );
                       }
+                     else if (index == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeFloorBill()),
+                        );
+                      } else if(index == 2) {
+                        Provider.of<Controller>(context, listen: false)
+                            .getDeliveryBillList(0, context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FirstDeleveryBill()),
+                        );
+                      } 
                     },
                   ),
                   SizedBox(

@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:provider/provider.dart';
 
 class DeliveryBillWidget extends StatefulWidget {
-  DeliveryBillWidget();
+  Map<int, List<Map<String, dynamic>>> dellist;
+  DeliveryBillWidget({required this.dellist});
   @override
   State<DeliveryBillWidget> createState() => _DeliveryBillWidgetState();
 }
@@ -18,25 +20,38 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
 
   @override
   void initState() {
+    // TODO: implement initState
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
     print("dateeeeeeeeeeeeeee= $date");
+       Provider.of<Controller>(context, listen: false).getDeliveryBillList(0,context);
     super.initState();
   }
+ 
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
     return Consumer<Controller>(
-      builder: (context, value, child) => ListView.builder(
+      builder: (context, value, child) =>
+      widget.dellist.isEmpty
+          ? Container(
+              height: size.height * 0.8,
+              child: Center(
+                  child: LottieBuilder.asset(
+                "assets/noData.json",
+                height: size.height * 0.24,
+              )))
+          :
+       ListView.builder(
         shrinkWrap: true,
-        itemCount: value.resultList.length,
+        itemCount: widget.dellist.length,
         itemBuilder: (context, index) {
-          int key = value.resultList.keys.elementAt(index);
-          List<Map<String, dynamic>> list = value.resultList[key]!;
+          int key = widget.dellist.keys.elementAt(index);
+          List<Map<String, dynamic>> list = widget.dellist[key]!;
 
           return Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -53,7 +68,7 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                       Row(
                         children: [
                           Text(
-                            "\u20B9 ${list[0]['Amount'].toStringAsFixed(2)}",
+                            "${list[0]['Amount'].toStringAsFixed(2)} \u20B9 ",
                             // widget.slotname,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18),
@@ -90,7 +105,8 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
+                               Row(
+                                children: [ Row(
                                   children: [
                                     Image.asset(
                                       "assets/card.png",
@@ -106,10 +122,22 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                                       style: TextStyle(fontSize: 18),
                                     )
                                   ],
-                                ),
-                                Text("FB# ${item['Fb_No'].toString()}")
+                                ), SizedBox(
+                                      width: 40,
+                                    ),
+                                Row(children: [
+                                  Image.asset(
+                                        "assets/bagimg.png",
+                                        color: Color.fromARGB(255, 61, 131, 63),
+                                        height: 27,
+                                        width: 27,
+                                      ),
+                                      Text(item['Slot_Name'].toString().trimLeft(),style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500),)
+                                ],),],),
+                                Text("FB# ${item['Fb_No'].toString()}",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500))
                               ],
                             ),
+                            
                           ],
                         ),
                         // Add more information if needed
@@ -118,48 +146,48 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                   },
                 ),
                 Card(
-                  color: Colors.blueGrey,
+                  color: Color.fromARGB(255, 193, 207, 214),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 15),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        // SizedBox(
+                        //   height: 50,
+                        //   child: ListView.builder(
+                        //       shrinkWrap: true,
+                        //       scrollDirection: Axis.horizontal,
+                        //       itemCount: value.slotIds.length,
+                        //       itemBuilder: (context, index) {
+                        //         return SizedBox(
+                        //           width: 40,
+                        //           height: 50,
+                        //           child: Stack(
+                        //             children: [
+                        //               Image.asset(
+                        //                 "assets/bagimg.png",
+                        //                 color: Colors.yellow,
+                        //                 height: 40,
+                        //                 width: 40,
+                        //               ),
+                        //               Positioned.fill(
+                        //                 child: Align(
+                        //                   alignment: Alignment.center,
+                        //                   child: Text(
+                        //                     value.slotIds[index].toString(),
+                        //                     style: TextStyle(
+                        //                         color: Colors.black,
+                        //                         fontWeight: FontWeight.w600),
+                        //                   ),
+                        //                 ),
+                        //               ),
+                        //             ],
+                        //           ),
+                        //         );
+                        //       }),
+                        // ),
                         SizedBox(
-                          height: 50,
-                          child: ListView.builder(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: value.slotIds.length,
-                              itemBuilder: (context, index) {
-                                return SizedBox(
-                                  width: 40,
-                                  height: 50,
-                                  child: Stack(
-                                    children: [
-                                      Image.asset(
-                                        "assets/bagimg.png",
-                                        color: Colors.yellow,
-                                        height: 40,
-                                        width: 40,
-                                      ),
-                                      Positioned.fill(
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            value.slotIds[index].toString(),
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                        ),
-                        SizedBox(
-                          height: 40,
+                          height: 35,
                           width: 100,
                           child: ElevatedButton(
                             onPressed: () {
@@ -196,6 +224,7 @@ class _DeliveryBillWidgetState extends State<DeliveryBillWidget> {
                 SizedBox(
                   height: 20,
                 ),
+               
               ],
             ),
           );

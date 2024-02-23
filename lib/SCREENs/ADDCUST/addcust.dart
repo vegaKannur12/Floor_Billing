@@ -1,3 +1,4 @@
+import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,7 +94,9 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
           padding: const EdgeInsets.all(12),
           child: SingleChildScrollView(
             child: Column(children: [
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -143,6 +146,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                 height: 55,
                 child: TextFormField(
                   // ignorePointers: value.typlock?true:false,
+                  keyboardType: TextInputType.phone,
                   controller: value.ccfon,
                   onChanged: (val) {},
                   decoration: InputDecoration(
@@ -185,6 +189,18 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                               ep = "Please enter Name & Contact";
                               value.setaDDUserError(
                                   "Please enter Name & Contact");
+                              CustomSnackbar snackbar = CustomSnackbar();
+                              // ignore: use_build_context_synchronously
+                              snackbar.showSnackbar(
+                                  context, "Please enter Name & Contact", "");
+                            } else if (value.ccfon.text.length != 10) {
+                              ep = 'Please Enter Valid Phone No ';
+                              value.setaDDUserError(
+                                  "Please Enter Valid Phone No");
+                              CustomSnackbar snackbar = CustomSnackbar();
+                              // ignore: use_build_context_synchronously
+                              snackbar.showSnackbar(
+                                  context, "Please Enter Valid Phone No", "");
                             } else {
                               value.createFloorCardsNew(date, value.ccname.text,
                                   value.ccfon.text, context);
