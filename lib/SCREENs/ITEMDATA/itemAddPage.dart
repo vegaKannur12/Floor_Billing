@@ -181,9 +181,10 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                 badges.BadgePosition.topEnd(top: -5, end: -10),
                             showBadge: true,
                             badgeContent: Text(
-                              value.unsavedList.length == null
-                                  ? "0"
-                                  : value.unsavedList.length.toString(),
+                              value.len.toString(),
+                              // value.unsavedList.length == null
+                              //     ? "0"
+                              //     : value.unsavedList.length.toString(),
                               style: TextStyle(color: Colors.white),
                             ),
                             child: IconButton(
@@ -801,23 +802,24 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                                                         //       "");
                                                                         // }
                                                                         else {
-                                                                          Provider.of<Controller>(context, listen: false).updateCart(
-                                                                              context,
-                                                                              date,
-                                                                              value.smantext[index].text,
-                                                                              0,
-                                                                              value.selectedBarcode,
-                                                                              double.parse(value.qty[index].text),
-                                                                              double.parse(value.persntage[index].text),
-                                                                              0);
-                                                                          Provider.of<Controller>(context, listen: false)
-                                                                              .getUnsavedCart(context);
-                                                                          Provider.of<Controller>(context, listen: false)
-                                                                              .setshowdata(false);
-                                                                          itembarcodctrl
-                                                                              .clear();
-                                                                          // setState(
-                                                                          //     () {});
+                                                                          WidgetsBinding
+                                                                              .instance
+                                                                              .addPostFrameCallback((_) {
+                                                                            Provider.of<Controller>(context, listen: false).updateCart(
+                                                                                context,
+                                                                                date,
+                                                                                value.smantext[index].text,
+                                                                                0,
+                                                                                value.selectedBarcode,
+                                                                                double.parse(value.qty[index].text),
+                                                                                double.parse(value.persntage[index].text),
+                                                                                0);
+                                                                            Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
+                                                                            Provider.of<Controller>(context, listen: false).setshowdata(false);
+                                                                            itembarcodctrl.clear();
+                                                                          });
+                                                                          setState(
+                                                                              () {});
                                                                         }
                                                                       },
                                                                       style: ElevatedButton.styleFrom(

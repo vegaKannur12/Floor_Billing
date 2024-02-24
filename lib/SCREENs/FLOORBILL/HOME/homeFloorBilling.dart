@@ -8,6 +8,7 @@ import 'package:floor_billing/SCREENs/ITEMDATA/bagwise_items.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/itemAddPage.dart';
 import 'package:floor_billing/SCREENs/ITEMDATA/viewcart.dart';
 import 'package:floor_billing/components/custom_snackbar.dart';
+import 'package:floor_billing/main.dart';
 import 'package:floor_billing/peridic_fun.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:badges/badges.dart' as badges;
 
 class HomeFloorBill extends StatefulWidget {
+
+  
   const HomeFloorBill({super.key});
 
   @override
@@ -45,10 +48,12 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
   FocusNode fonfocus = FocusNode();
   String _scanBarcode = 'Unknown';
   String ep = "";
-
+String cn="";
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    getcname();
     // FunctionUtils.runFunctionPeriodically(context);
     Provider.of<Controller>(context, listen: false).clearCardID("0");
     cardfocus.addListener(() {
@@ -70,7 +75,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
         Provider.of<Controller>(context, listen: false)
             .setBagNo(bagno.text.toString(), context);
       }
-    });
+    });});
     // fonfocus.addListener(() {
     //   if (Provider.of<Controller>(context, listen: false).ccfon.text.length !=
     //       10)
@@ -100,7 +105,12 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
     fonfocus.removeListener(() {});
     super.dispose();
   }
-
+getcname()
+async {
+ final SharedPreferences prefs = await SharedPreferences.getInstance();
+ 
+  cn = prefs.getString("cname")!;
+}
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -122,7 +132,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
               builder:
                   (BuildContext context, Controller value, Widget? child) =>
                       Text(
-                        value.cName.toString(),
+                        cn.toString(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -479,7 +489,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                             ElevatedButton(
                               onPressed: () {
                                 if (value.ccname.text == "" ||
-                                    value.ccfon.text == "") {
+                                    value.ccfon.text == "" ) {
                                   ep = "Please enter Name & Contact";
                                   value.setaDDUserError(
                                       "Please enter Name & Contact");
@@ -547,9 +557,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                         height: 45,
                         width: 230,
                         child: TextFormField(
-                          ignorePointers: value.igno ||
-                                  value.ccname.text.isEmpty ||
-                                  value.ccfon.text.isEmpty
+                          ignorePointers: value.igno
                               ? true
                               : false,
                           focusNode: bagFocus,
@@ -622,16 +630,21 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                               CustomSnackbar snackbar = CustomSnackbar();
                               snackbar.showSnackbar(
                                   context, "Choose valid slot...", "");
-                            } else if (Provider.of<Controller>(context,
+                            } 
+                            else if (Provider.of<Controller>(context,
                                         listen: false)
                                     .ccfon
                                     .text
                                     .length !=
-                                10) {
+                                10 && Provider.of<Controller>(context,
+                                        listen: false)
+                                    .ccfon
+                                    .text.isNotEmpty) {
                               CustomSnackbar snackbar = CustomSnackbar();
                               snackbar.showSnackbar(
                                   context, "Enter valid contact...", "");
-                            } else {
+                            } 
+                            else {
                               print("card---->${value.card_id.toString()}");
                               print("bag---->${value.bag_no.toString()}");
                               WidgetsBinding.instance.addPostFrameCallback((_) {

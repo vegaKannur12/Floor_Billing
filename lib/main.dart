@@ -16,6 +16,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 bool isLoggedIn = false;
 bool isRegistered = false;
+ String cn="";
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -53,6 +54,7 @@ checkRegistration() async {
   // prefs.setString("st_uname", "anu");
   // prefs.setString("st_pwd", "anu");
   final cid = prefs.getString("cid");
+  final cm = prefs.getString("cname");
   if (cid != null) {
     isAuthenticated = true;
   } else {
@@ -91,12 +93,19 @@ void requestPermission() async {
     await Permission.manageExternalStorage.request();
   }
 }
+getcname()
+async {
+ final SharedPreferences prefs = await SharedPreferences.getInstance();
+ 
+  cn = prefs.getString("cname")!;
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -114,7 +123,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/floorhome': (context) => HomeFloorBill(),
-        '/mainpage': (context) => MainHome(),
+        // '/mainpage': (context) => MainHome(),
       },
       home: SplashScreen(),
       // LoginPage(),

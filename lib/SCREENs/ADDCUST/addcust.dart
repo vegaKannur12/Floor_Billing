@@ -30,30 +30,29 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
   void initState() {
     super.initState();
     // FunctionUtils.runFunctionPeriodically(context);
-    Provider.of<Controller>(context, listen: false).clearCardID("0");
-    cardfocus.addListener(() {
-      if (!cardfocus.hasFocus) {
-        getCustdetails(Provider.of<Controller>(context, listen: false)
-            .cardNoctrl
-            .text
-            .toString());
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<Controller>(context, listen: false).clearCardID("0");
+      cardfocus.addListener(() {
+        if (!cardfocus.hasFocus) {
+          getCustdetails(Provider.of<Controller>(context, listen: false)
+              .cardNoctrl
+              .text
+              .toString());
+        }
+      });
+      bagFocus.addListener(() {
+        if (!bagFocus.hasFocus) {
+          // Provider.of<Controller>(context, listen: false).setcusnameAndPhone(
+          //     Provider.of<Controller>(context, listen: false).ccname.text,
+          //     Provider.of<Controller>(context, listen: false).ccfon.text,
+          //     context);
+          // Provider.of<Controller>(context, listen: false)
+          //     .getBagDetails(bagno.text.toString(), context, "home");
+          // Provider.of<Controller>(context, listen: false)
+          //     .setBagNo(bagno.text.toString());
+        }
+      });
     });
-    bagFocus.addListener(() {
-      if (!bagFocus.hasFocus) {
-        // Provider.of<Controller>(context, listen: false).setcusnameAndPhone(
-        //     Provider.of<Controller>(context, listen: false).ccname.text,
-        //     Provider.of<Controller>(context, listen: false).ccfon.text,
-        //     context);
-        // Provider.of<Controller>(context, listen: false)
-        //     .getBagDetails(bagno.text.toString(), context, "home");
-        // Provider.of<Controller>(context, listen: false)
-        //     .setBagNo(bagno.text.toString());
-      }
-    });
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-
-    // });
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
   }
 
@@ -178,62 +177,123 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                       hintText: "Customer Name"),
                 ),
               ),
-              value.showadduser
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            if (value.ccname.text == "" ||
-                                value.ccfon.text == "") {
-                              ep = "Please enter Name & Contact";
-                              value.setaDDUserError(
-                                  "Please enter Name & Contact");
-                              CustomSnackbar snackbar = CustomSnackbar();
-                              // ignore: use_build_context_synchronously
-                              snackbar.showSnackbar(
-                                  context, "Please enter Name & Contact", "");
-                            } else if (value.ccfon.text.length != 10) {
-                              ep = 'Please Enter Valid Phone No ';
-                              value.setaDDUserError(
-                                  "Please Enter Valid Phone No");
-                              CustomSnackbar snackbar = CustomSnackbar();
-                              // ignore: use_build_context_synchronously
-                              snackbar.showSnackbar(
-                                  context, "Please Enter Valid Phone No", "");
-                            } else {
-                              value.createFloorCardsNew(date, value.ccname.text,
-                                  value.ccfon.text, context);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black54),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 8),
-                            child: Text(
-                              "ADD NEW USER",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                  color:
-                                      Theme.of(context).secondaryHeaderColor),
-                            ),
+              SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (value.ccname.text == "" || value.ccfon.text == "") {
+                        ep = "Please enter Name & Contact";
+                        value.setaDDUserError("Please enter Name & Contact");
+                        CustomSnackbar snackbar = CustomSnackbar();
+                        // ignore: use_build_context_synchronously
+                        snackbar.showSnackbar(
+                            context, "Please enter Name & Contact", "");
+                      } else if (value.ccfon.text.length != 10) {
+                        ep = 'Please Enter Valid Phone No ';
+                        value.setaDDUserError("Please Enter Valid Phone No");
+                        CustomSnackbar snackbar = CustomSnackbar();
+                        // ignore: use_build_context_synchronously
+                        snackbar.showSnackbar(
+                            context, "Please Enter Valid Phone No", "");
+                      } else {
+                        value.createFloorCardsNew(
+                            date, value.ccname.text, value.ccfon.text, context);
+
+                            // value.ccname.clear();
+                            // value.ccfon.clear();
+                            showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Customer Added ",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('OK'),
+                  onPressed: () async {
+                    
+                        Provider.of<Controller>(context, listen: false)
+                            .clearCardID("0");
+                            Provider.of<Controller>(context, listen: false).setcusnameAndPhone("", "", context);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+                      }
+                    },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            "NEW",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Theme.of(context).secondaryHeaderColor),
                           ),
-                        ),
-                        SizedBox(
-                          child: IconButton(
-                              onPressed: () {
-                                value.userAddButtonDisable(false);
-                                value.ccfon.clear();
-                                value.ccname.clear();
-                                value.card_id = "";
-                                value.setaDDUserError("");
-                              },
-                              icon: Icon(Icons.refresh)),
-                        )
-                      ],
-                    )
-                  : Container(),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Image.asset(
+                            "assets/name.png",
+                            color: Colors.black,
+                            height: 20,
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            "PRINT",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Theme.of(context).secondaryHeaderColor),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Image.asset(
+                            "assets/print.png",
+                            color: Colors.black,
+                            height: 20,
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ]),
           ),
         ),

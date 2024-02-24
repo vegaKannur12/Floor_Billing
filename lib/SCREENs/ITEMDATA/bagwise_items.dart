@@ -35,21 +35,25 @@ class _BagwiseItemsState extends State<BagwiseItems> {
             Container()
             :
           Container(
-            color: Colors.black,
-            height: 40,
+           
+            height: 45,
             width: size.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "GRAND TOTAL",
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  "${value.all_total.toStringAsFixed(2)}",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
+            decoration: BoxDecoration(borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)), color: Colors.black,),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20,right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "GRAND TOTAL",
+                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold, ),
+                  ),
+                  Text(
+                    "${value.all_total.toStringAsFixed(2)} \u20B9",
+                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,),
+                  ),
+                ],
+              ),
             ),
           )
         
@@ -112,7 +116,7 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Text('Rate: ${item['Rate']}'),
+                                    Text('Rate: ${item['Rate'].toStringAsFixed(2)} \u20B9'),
                                   ],
                                 ),
                                 Row(
@@ -120,7 +124,7 @@ class _BagwiseItemsState extends State<BagwiseItems> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text('Qty: ${item['Qty']}'),
-                                    Text('\u20B9 ${item['Amount']}',
+                                    Text('${item['Amount'].toStringAsFixed(2)} \u20B9',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 15)),

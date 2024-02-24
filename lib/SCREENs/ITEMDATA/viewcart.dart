@@ -1,5 +1,6 @@
 import 'package:floor_billing/components/printclass.dart';
 import 'package:floor_billing/controller/controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -180,167 +181,169 @@ class _ViewCartPageState extends State<ViewCartPage> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: value.unsavedList.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.black38),
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: InkWell(
-                                    child: ListTile(
-                                      title: Text(
-                                        "${value.unsavedList[index]["Prod_Name"].toString().trimLeft()}",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                            color: Colors.brown),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "\u20B9 ${value.unsavedList[index]["Cart_Rate"].toStringAsFixed(2)} ",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "${value.unsavedList[index]["Cart_Qty"].toString()} ",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 18),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Discount: "),
-                                              Text(
-                                                  "\u20B9 ${value.unsavedList[index]["DiscValue"].toString()}"),
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Divider(),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "Total : ",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 22),
-                                                  ),
-                                                  Text(
-                                                    "\u{20B9}${value.unsavedList[index]["Total"].toStringAsFixed(2)}",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 22,
-                                                        color: Colors.green),
-                                                  ),
-                                                ],
-                                              ),
-                                              InkWell(
-                                                  onTap: () async {
-                                                    await showDialog(
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return AlertDialog(
-                                                            content: Text(
-                                                                'Delete ${value.unsavedList[index]["Prod_Name"].toString().trimLeft()}?'),
-                                                            actions: <Widget>[
-                                                              new TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context,
-                                                                          rootNavigator:
-                                                                              true)
-                                                                      .pop(
-                                                                          false); // dismisses only the dialog and returns false
-                                                                },
-                                                                child:
-                                                                    Text('No'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Provider.of<Controller>(context, listen: false).updateCart(
-                                                                      context,
-                                                                      date
-                                                                          .toString(),
-                                                                      value.unsavedList[index]["Cart_Sm_Code"]
-                                                                          .toString(),
-                                                                      value.unsavedList[index]
-                                                                          [
-                                                                          "Cart_Row"],
-                                                                      value.unsavedList[index]["Cart_Batch"]
-                                                                          .toString()
-                                                                          .trim(),
-                                                                      double.parse(value
-                                                                          .unsavedList[index]
-                                                                              [
-                                                                              "Cart_Qty"]
-                                                                          .toString()),
-                                                                      double.parse(value
-                                                                          .unsavedList[index]
-                                                                              ["Cart_Disc_Per"]
-                                                                          .toString()),
-                                                                      1);
-                                                                  Provider.of<Controller>(
-                                                                          context,
-                                                                          listen:
-                                                                              false)
-                                                                      .getUnsavedCart(
-                                                                          context);
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                },
-                                                                child:
-                                                                    Text('Yes'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        });
-                                                  },
-                                                  child: Icon(
-                                                    Icons.delete,
-                                                    color: Colors.red,
-                                                  )),
-                                            ],
-                                          )
-                                        ],
+              Expanded(
+                child: ListView.builder(
+                    shrinkWrap: true,scrollDirection: Axis.vertical,
+                    itemCount: value.unsavedList.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: Colors.black38),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: InkWell(
+                                      child: ListTile(
+                                        title: Text(
+                                          "${value.unsavedList[index]["Prod_Name"].toString().trimLeft()}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                              color: Colors.brown),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  "\u20B9 ${value.unsavedList[index]["Cart_Rate"].toStringAsFixed(2)} ",
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 18),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      "${value.unsavedList[index]["Cart_Qty"].toString()} ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Discount: "),
+                                                Text(
+                                                    "\u20B9 ${value.unsavedList[index]["DiscValue"].toString()}"),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Divider(),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      "Total : ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 22),
+                                                    ),
+                                                    Text(
+                                                      "\u{20B9}${value.unsavedList[index]["Total"].toStringAsFixed(2)}",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 22,
+                                                          color: Colors.green),
+                                                    ),
+                                                  ],
+                                                ),
+                                                InkWell(
+                                                    onTap: () async {
+                                                      await showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return AlertDialog(
+                                                              content: Text(
+                                                                  'Delete ${value.unsavedList[index]["Prod_Name"].toString().trimLeft()}?'),
+                                                              actions: <Widget>[
+                                                                new TextButton(
+                                                                  onPressed: () {
+                                                                    Navigator.of(
+                                                                            context,
+                                                                            rootNavigator:
+                                                                                true)
+                                                                        .pop(
+                                                                            false); // dismisses only the dialog and returns false
+                                                                  },
+                                                                  child:
+                                                                      Text('No'),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () {
+                                                                    Provider.of<Controller>(context, listen: false).updateCart(
+                                                                        context,
+                                                                        date
+                                                                            .toString(),
+                                                                        value.unsavedList[index]["Cart_Sm_Code"]
+                                                                            .toString(),
+                                                                        value.unsavedList[index]
+                                                                            [
+                                                                            "Cart_Row"],
+                                                                        value.unsavedList[index]["Cart_Batch"]
+                                                                            .toString()
+                                                                            .trim(),
+                                                                        double.parse(value
+                                                                            .unsavedList[index]
+                                                                                [
+                                                                                "Cart_Qty"]
+                                                                            .toString()),
+                                                                        double.parse(value
+                                                                            .unsavedList[index]
+                                                                                ["Cart_Disc_Per"]
+                                                                            .toString()),
+                                                                        1);
+                                                                    Provider.of<Controller>(
+                                                                            context,
+                                                                            listen:
+                                                                                false)
+                                                                        .getUnsavedCart(
+                                                                            context);
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  },
+                                                                  child:
+                                                                      Text('Yes'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          });
+                                                    },
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.red,
+                                                    )),
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )),
-                          ],
-                        ));
-                  }),
+                                  )),
+                            ],
+                          ));
+                    }),
+              ),
             ],
           );
         },

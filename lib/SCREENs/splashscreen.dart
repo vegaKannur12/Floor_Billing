@@ -36,7 +36,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final cid = prefs.getString("cid");
     if (cid != null) {
       isAuthenticated = true;
-    } else {
+    } 
+    else 
+    {
       isAuthenticated = false;
     }
     return isAuthenticated;
@@ -51,9 +53,12 @@ class _SplashScreenState extends State<SplashScreen> {
           PageRouteBuilder(
               opaque: false, // set to false
               pageBuilder: (_, __, ___) {
-                if (isRegistered) {
+                if (isRegistered) 
+                {
                   return DBSelection();
-                } else {
+                } 
+                else 
+                {
                   return Registration();
                 }
               }));

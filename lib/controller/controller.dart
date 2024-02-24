@@ -4,7 +4,10 @@ import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/mainHome.dart';
 import 'package:floor_billing/SCREENs/db_selection.dart';
 import 'package:floor_billing/MODEL/registration_model.dart';
+import 'package:floor_billing/authentication/login.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +16,7 @@ import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/components/external_dir.dart';
 import 'package:floor_billing/db_helper.dart';
 import 'package:floor_billing/MODEL/customer_model.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
 import '../components/network_connectivity.dart';
@@ -24,6 +28,7 @@ class Controller extends ChangeNotifier {
   String? cname;
 
   bool isSearch = false;
+  bool isDelSearch = false;
   DateTime? sdate;
   DateTime? ldate;
   String? os;
@@ -33,7 +38,7 @@ class Controller extends ChangeNotifier {
   ExternalDir externalDir = ExternalDir();
   List<CD> c_d = [];
   String? sof;
- bool incorect=false;
+  bool incorect = false;
   // ignore: prefer_typing_uninitialized_variables
   var jsonEncoded;
   DateTime d = DateTime.now();
@@ -68,7 +73,7 @@ class Controller extends ChangeNotifier {
   bool isTableLoading = false;
   bool isCategoryLoading = false;
   bool isItemLoading = false;
-
+  List delWidget = [];
   String? catlID = "";
   Timer timer = Timer.periodic(Duration(seconds: 3), (timer) {});
 
@@ -114,11 +119,14 @@ class Controller extends ChangeNotifier {
   int allbagallcount = 0;
   List fbList = [];
   List fbResulList = [];
+  List delList = [];
+  List delResulList = [];
   bool showadduser = false;
   bool typlock = false;
   bool tapped = false;
   List printingList = [];
   List deliveryBillList = [];
+  int len = 0;
   Map<int, List<Map<String, dynamic>>> resultList = {};
   Map<int, List<Map<String, dynamic>>> sortedDelvryList = {};
   List slotIds = [];
@@ -192,8 +200,13 @@ class Controller extends ChangeNotifier {
               cid = regModel.cid;
               os = regModel.os;
               prefs.setString("cid", cid!);
+              for (var item in regModel.c_d!) {
+                print("cinm......${item.cnme.toString()}");
+                c_d.add(item);
+              }
               cname = regModel.c_d![0].cnme;
-
+              notifyListeners();
+              print("regModel.c_d![0].cnme-----${regModel.c_d![0].cnme}");
               prefs.setString("cname", cname!);
               prefs.setString("os", os!);
               print("cid----cname-----$cid---$cname....$os");
@@ -202,10 +215,10 @@ class Controller extends ChangeNotifier {
               await externalDir.fileWrite(fp1!);
 
               // ignore: duplicate_ignore
-              for (var item in regModel.c_d!) {
-                print("ciddddddddd......$item");
-                c_d.add(item);
-              }
+              // for (var item in regModel.c_d!) {
+              //   print("ciddddddddd......$item");
+              //   c_d.add(item);
+              // }noteee
               // verifyRegistration(context, "");
 
               isLoading = false;
@@ -223,10 +236,18 @@ class Controller extends ChangeNotifier {
               await BILLING.instance
                   .deleteFromTableCommonQuery("companyRegistrationTable", "");
               // ignore: use_build_context_synchronously
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DBSelection()),
-              );
+              String? m_db = prefs.getString("multi_db");
+              if (m_db == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DBSelection()),
+                );
+              }
             } else {
               CustomSnackbar snackbar = CustomSnackbar();
               // ignore: use_build_context_synchronously
@@ -252,20 +273,22 @@ class Controller extends ChangeNotifier {
 
   //////////////////////////////////////////////////////////
   getLogin(String userName, String password, BuildContext context) async {
-    incorect=false;
-       notifyListeners();
+    incorect = false;
+    notifyListeners();
     try {
       isLoginLoading = true;
       notifyListeners();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? os = prefs.getString("os");
-
+      String? cn = prefs.getString("cname");
+      print("cnameeeeee$cn");
       print("unaaaaaaaaaaammmeeeeeeeee$userName");
       String oo = "Flt_Sp_Verify_User '$os','$userName','$password'";
       print("loginnnnnnnnnnnnnnn$oo");
       //  print("{Flt_Sp_Verify_User '$os','$userName','$password'}");
       // initDb(context, "from login");
       // initYearsDb(context, "");
+      // await initYearsDb(context, ""); noteeeeee
       var res = await SqlConn.readData(
           "Flt_Sp_Verify_User '$os','$userName','$password'");
       var valueMap = json.decode(res);
@@ -279,16 +302,20 @@ class Controller extends ChangeNotifier {
             valueMap[0]["Flt_Display_Name"].toString().trimLeft());
         prefs.setString("st_uname", userName);
         prefs.setString("st_pwd", password);
+
         await getSalesman();
         await setUID();
         // SqlConn.disconnect();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MainHome()),
+          MaterialPageRoute(
+              builder: (context) => MainHome(
+                   
+                  )),
         );
       } else {
-       incorect=true;
-       notifyListeners();
+        incorect = true;
+        notifyListeners();
         CustomSnackbar snackbar = CustomSnackbar();
         snackbar.showSnackbar(context, "Incorrect Username or Password", "");
         isLoginLoading = false;
@@ -297,42 +324,89 @@ class Controller extends ChangeNotifier {
 
       isLoginLoading = false;
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? os = prefs.getString("os");
+        String? cn = prefs.getString("cname");
+        // If connected, do not pop context as it may dismiss the error dialog
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainHome()),
+        );
+
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -404,40 +478,42 @@ class Controller extends ChangeNotifier {
       prefs.setString("BagNo", data);
       bag_no = data;
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
@@ -507,42 +583,82 @@ class Controller extends ChangeNotifier {
       print("SLot ==$slot_id");
 
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      // Handle the PlatformException here
-      // You can log the exception, display an error message, or take other appropriate actions
-    } catch (e) {
+    }
+    //  on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   // Handle the PlatformException here
+    //   // You can log the exception, display an error message, or take other appropriate actions
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        // Navigator.pop(context);
+
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -722,45 +838,84 @@ class Controller extends ChangeNotifier {
       //   code: 'ERROR',
       //   message: 'Network error IOException: failed to connect...',
       // );
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      // await SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Not Connected.! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-                SpinKitCircle(
-                  color: Colors.green,
-                )
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Connect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    }
+    //  on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   // await SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Not Connected.! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //             SpinKitCircle(
+    //               color: Colors.green,
+    //             )
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Connect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        // Navigator.pop(context);
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -786,7 +941,6 @@ class Controller extends ChangeNotifier {
       print("Saved result--$savedresult");
       await getprintingFBdetails(dt, os!, int.parse(card_id),
           int.parse(savedresult[0]['FB_no'].toString()));
-      
     } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       SqlConn.disconnect();
@@ -844,10 +998,8 @@ class Controller extends ChangeNotifier {
     notifyListeners();
     print("printing data result--$printingList");
   }
-  clearprintList()
-  {
 
-  }
+  clearprintList() {}
 
   discount_calc(int index, String type) {
     if (type == "from add") {
@@ -871,6 +1023,7 @@ class Controller extends ChangeNotifier {
   ////////////////////////////////////////////////////////
   getDatabasename(BuildContext context, String type) async {
     isdbLoading = true;
+    db_list.clear();
     notifyListeners();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? db = prefs.getString("db_name");
@@ -878,20 +1031,22 @@ class Controller extends ChangeNotifier {
     print("cid dbname---------$cid---$db");
     var res = await SqlConn.readData("Flt_LoadYears '$db','$cid'");
     var map = jsonDecode(res);
-    db_list.clear();
+
     if (map != null) {
       for (var item in map) {
         db_list.add(item);
       }
     }
+    notifyListeners();
     print("years res-$res");
     print("tyyyyyyyyyp--------$type");
     isdbLoading = false;
     notifyListeners();
-    SqlConn.disconnect();
-    print("disconnected--------$db");
+
     if (db_list.length > 1) {
       if (type == "from login") {
+        await SqlConn.disconnect();
+        print("disconnected--------$db");
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => DBSelection()),
@@ -900,7 +1055,7 @@ class Controller extends ChangeNotifier {
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeFloorBill()),
+        MaterialPageRoute(builder: (context) => LoginPage()),
       );
     }
   }
@@ -957,47 +1112,11 @@ class Controller extends ChangeNotifier {
           username: un!,
           password: pw!,
           timeout: 10,
-        ).timeout(
-          Duration(seconds: 10),
-          onTimeout: () {
-            print("time out............");
-            showDialog(
-              context: context,
-              builder: (context) {
-                // Navigator.push(
-                //   context,
-                //   new MaterialPageRoute(builder: (context) => HomePage()),
-                // );
-                // Future.delayed(Duration(seconds: 5), () {
-                //   Navigator.of(mycontxt).pop(true);
-                // });
-                return AlertDialog(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Timeout",
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      SpinKitCircle(
-                        color: Colors.green,
-                      )
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                        onPressed: () async {
-                          await initYearsDb(context, "");
-                          // CustomSnackbar snackbar = CustomSnackbar();
-                          // snackbar.showSnackbar(context, "Couldnt connect", "");
-                        },
-                        child: Text('Try again'))
-                  ],
-                );
-              },
-            );
-          },
         );
+        //  Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => LoginPage()),
+        // );
       }
       debugPrint("Connected selected DB!----$ip------$db");
       // getDatabasename(context, type);
@@ -1006,7 +1125,7 @@ class Controller extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       // yr = prefs.getString("yr_name");
       // dbn = prefs.getString("db_name");
-      cName = prefs.getString("cname");
+      cname = prefs.getString("cname");
       isYearSelectLoading = false;
       notifyListeners();
       // prefs.setString("db_name", dbn.toString());
@@ -1062,85 +1181,88 @@ class Controller extends ChangeNotifier {
 
       debugPrint("Connected!");
       getDatabasename(context, type);
+      notifyListeners();
       // throw TimeoutException(message);
-      throw PlatformException(
-        code: 'ERROR',
-        message: 'Network error IOException: failed to connect...',
-      );
-    } on TimeoutException catch (_) {
-      // Handle timeout exception
-      await SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Timeout",
-                  style: TextStyle(fontSize: 13),
-                ),
-                SpinKitCircle(
-                  color: Colors.green,
-                )
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  await initDb(context, "");
-                  Navigator.of(context).pop();
-                },
-                child: Text('Try again'),
-              ),
-            ],
-          );
-        },
-      );
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      // await SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Not Connected.! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-                SpinKitCircle(
-                  color: Colors.green,
-                )
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Connect'),
-                onPressed: () async {
-                  await initDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+      // throw PlatformException(
+      //   code: 'ERROR',
+      //   message: 'Network error IOException: failed to connect...',
+      // );
+    }
+    // on TimeoutException catch (_) {
+    //   // Handle timeout exception
+    //   await SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Timeout",
+    //               style: TextStyle(fontSize: 13),
+    //             ),
+    //             SpinKitCircle(
+    //               color: Colors.green,
+    //             )
+    //           ],
+    //         ),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () async {
+    //               await initDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //             child: Text('Try again'),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // } on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   // await SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Not Connected.! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //             SpinKitCircle(
+    //               color: Colors.green,
+    //             )
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Connect'),
+    //             onPressed: () async {
+    //               await initDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     } finally {
       if (SqlConn.isConnected) {
         // If connected, do not pop context as it may dismiss the error dialog
-        Navigator.pop(context);
+        // Navigator.pop(context);
         debugPrint("Database connected, not popping context.");
       } else {
         // If not connected, pop context to dismiss the dialog
@@ -1272,42 +1394,82 @@ class Controller extends ChangeNotifier {
       }
 
       // SqlConn.disconnect();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      // Handle the PlatformException here
-      // You can log the exception, display an error message, or take other appropriate actions
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   // Handle the PlatformException here
+    //   // You can log the exception, display an error message, or take other appropriate actions
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        Navigator.pop(context);
+
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -1343,6 +1505,7 @@ class Controller extends ChangeNotifier {
         notifyListeners();
       } else {
         //  prefs.setInt("CardID", custDetailsList[0]['CardID']);
+        igno = false;
         card_id = custDetailsList[0]['CardID'].toString();
         setcusnameAndPhone(custDetailsList[0]['Cust_Name'].toString().trim(),
             custDetailsList[0]['Cust_Phone'].toString().trim(), context);
@@ -1352,42 +1515,85 @@ class Controller extends ChangeNotifier {
 
       notifyListeners();
       print("card ID--Name---Contact------->$card_id--$cus_name--$cus_contact");
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        // Navigator.pop(context);
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => MainHome()),
+        // );
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -1424,7 +1630,7 @@ class Controller extends ChangeNotifier {
         userAddButtonDisable(false);
         setaDDUserError(" ");
         typlock = true;
-         igno = false;
+        igno = false;
         // getUsedBags(context, date, card_id);
         notifyListeners();
         print(
@@ -1457,42 +1663,85 @@ class Controller extends ChangeNotifier {
           },
         );
       }
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      // Handle the PlatformException here
-      // You can log the exception, display an error message, or take other appropriate actions
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   // Handle the PlatformException here
+    //   // You can log the exception, display an error message, or take other appropriate actions
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        Navigator.pop(context);
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => MainHome()),
+        // );
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -1606,49 +1855,52 @@ class Controller extends ChangeNotifier {
       //   code: 'ERROR',
       //   message: 'Network error IOException: failed to connect...',
       // );
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
   }
 
-clearunsaved(){
-  unsavedList.clear();
-  notifyListeners();
-}
+  clearunsaved() {
+    unsavedList.clear();
+    notifyListeners();
+  }
+
   ////////////////////////////////////////
   getUnsavedCart(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1658,6 +1910,7 @@ clearunsaved(){
       'os ----- $os, cardId ------->$card_id, cart No----------$cart_id',
     );
     // await initYearsDb(context, "");
+    len = 0;
     unsavedList.clear();
     notifyListeners();
     try {
@@ -1667,10 +1920,11 @@ clearunsaved(){
       // SqlConn.disconnect();
       print("unsaved cart------------>>$res");
 
-      unsavedList.clear();
       for (var item in map) {
         unsavedList.add(item);
       }
+      len = unsavedList.length;
+      notifyListeners();
       qty =
           List.generate(unsavedList.length, (index) => TextEditingController());
       persntage =
@@ -1687,42 +1941,82 @@ clearunsaved(){
         notifyListeners();
       }
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      // Handle the PlatformException here
-      // You can log the exception, display an error message, or take other appropriate actions
-    } catch (e) {
+    }
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   // Handle the PlatformException here
+    //   // You can log the exception, display an error message, or take other appropriate actions
+    // }
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
+    } finally {
+      if (SqlConn.isConnected) {
+        // If connected, do not pop context as it may dismiss the error dialog
+        // Navigator.pop(context);
+
+        debugPrint("Database connected, not popping context.");
+      } else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
     }
   }
 
@@ -1733,6 +2027,9 @@ clearunsaved(){
     ccfon.clear();
     ccname.clear();
     usedbagITEMList.clear();
+    len = 0;
+    unsavedList.clear();
+
     notifyListeners();
   }
 
@@ -1796,9 +2093,279 @@ clearunsaved(){
     }
   }
 
+  getDELList(int b_no, BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? os = await prefs.getString("os");
+    int car;
+    card_id == "" ? car = 0 : car = int.parse(card_id);
+
+    print("tabl para---------$os----$b_no");
+    try {
+      var res =
+          await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
+      var map = jsonDecode(res);
+      deliveryBillList.clear();
+      sortedDelvryList.clear();
+      delList.clear();
+      if (map != null) {
+        for (var item in map) {
+          delList.add(item);
+        }
+        deliveryBillList = delList.where((map) => map['Paid'] == 1).toList();
+        for (var item in deliveryBillList) {
+          int fbNo = item['Bill_No'];
+
+          if (!sortedDelvryList.containsKey(fbNo)) {
+            sortedDelvryList[fbNo] = [];
+          }
+          sortedDelvryList[fbNo]!.add(item);
+        }
+        notifyListeners();
+
+        // delResulList = delList;
+        // isDelSearch = false;
+      }
+      print("delList-----$res");
+      print("sorted====>$sortedDelvryList");
+      Map so = {
+        1237: [
+          {
+            'Bill_No': 1237,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 1237,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+        123757: [
+          {
+            'Bill_No': 123757,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 123757,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+      };
+      getDelwidget(so, context);
+      // getDelwidget(sortedDelvryList,context);
+      notifyListeners();
+    } on PlatformException catch (e) {
+      print("PlatformException occurredcttr: $e");
+      SqlConn.disconnect();
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Connection Lost...! ",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Reconnect'),
+                onPressed: () async {
+                  await initYearsDb(context, "");
+                  // Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      print(e);
+      return null;
+    } catch (e) {
+      print("An unexpected error occurred: $e");
+      // Handle other types of exceptions
+    }
+  }
+
+  getDelwidget(Map sorted, BuildContext context) {
+    delWidget.add(Expanded(
+      child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: sorted.keys.length,
+          itemBuilder: (context, index) {
+            final billNo = sorted.keys.elementAt(index);
+            final billDetails = sorted[billNo]!;
+            double amt = billDetails[index]['Amount'];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Bill No# $billNo',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        "${amt.toStringAsFixed(2)} \u20B9 ",
+                        // widget.slotname,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      )
+                    ],
+                  ),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: billDetails.length,
+                  itemBuilder: (context, index) {
+                    final details = billDetails[index];
+                    return Container(
+                      height: 40,
+                      child: ListTile(
+                        subtitle: Column(
+                          children: [
+                            // Text('Slot Name: ${details['Slot_Name']}'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.asset(
+                                      "assets/card.png",
+                                      height: 20,
+                                      width: 20,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      details['CardNo'].toString().trimLeft(),
+                                      // widget.slotname,
+                                      style: TextStyle(fontSize: 18),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 30,
+                                ),
+                                Row(
+                                  children: [
+                                    Image.asset(
+                                      "assets/bagimg.png",
+                                      color: Color.fromARGB(255, 61, 131, 63),
+                                      height: 27,
+                                      width: 27,
+                                    ),
+                                    Text(
+                                      details['Slot_Name']
+                                          .toString()
+                                          .trimLeft(),
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500),
+                                    )
+                                  ],
+                                ),
+                                Text("FB# ${details['Fb_No'].toString()}",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500))
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Add more details to display if needed
+                      ),
+                    );
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: 35,
+                        width: 100,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            getDelivery(billNo, context);
+                            Provider.of<Controller>(context, listen: false)
+                                .getDELList(0, context);
+                            CustomSnackbar snackbar = CustomSnackbar();
+                            snackbar.showSnackbar(
+                                context, "Item Delevered...", "");
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent),
+                          child: Text(
+                            "DELIVER",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                color: Theme.of(context).secondaryHeaderColor),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          }),
+    ));
+  }
+
 /////////////////////////////////////
   getDeliveryBillList(int b_no, BuildContext context) async {
-    try {deliveryBillList.clear();
+    try {
+      deliveryBillList.clear();
       sortedDelvryList.clear();
       resultList.clear();
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1829,7 +2396,7 @@ clearunsaved(){
           }
           sortedDelvryList[fbNo]!.add(item);
         }
-        
+
         resultList = sortedDelvryList;
       }
 
@@ -1876,20 +2443,19 @@ clearunsaved(){
   }
 
   //////////////////////////////////////
-  getDelivery(int b_no,BuildContext context) async {
+  getDelivery(int b_no, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = await prefs.getString("os");
-    try{
-    print("DeliveryBill para----------$os-----$b_no");
+    try {
+      print("DeliveryBill para----------$os-----$b_no");
 
-    var res =
-        await SqlConn.readData("Flt_Sp_UpdateBills_For_Delivery '$os',$b_no");
-    var map = jsonDecode(res);
-    print("deliveryBilUpdate-----$map");
-     deliveryBillList.clear();
-    notifyListeners();
-    }
-    on PlatformException catch (e) {
+      var res =
+          await SqlConn.readData("Flt_Sp_UpdateBills_For_Delivery '$os',$b_no");
+      var map = jsonDecode(res);
+      print("deliveryBilUpdate-----$map");
+      deliveryBillList.clear();
+      notifyListeners();
+    } on PlatformException catch (e) {
       print("PlatformException occurredcttr: $e");
       // await SqlConn.disconnect();
       showDialog(
@@ -1929,7 +2495,6 @@ clearunsaved(){
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
-
   }
 
   searchItem(String key) {
@@ -1940,9 +2505,7 @@ clearunsaved(){
       isSearch = true;
       notifyListeners();
       resultList[keyy] = sortedDelvryList[keyy]!;
-    } 
-    else 
-    {
+    } else {
       isSearch = false;
       resultList = sortedDelvryList;
       notifyListeners();
@@ -1970,6 +2533,31 @@ clearunsaved(){
     } else {
       isSearch = false;
       fbResulList = fbList;
+      notifyListeners();
+    }
+    notifyListeners();
+  }
+
+  searchDelevery(String key) {
+    print(key);
+
+    if (key != null) {
+      isDelSearch = true;
+      notifyListeners();
+      delResulList = delList
+          .where((e) => e["Bill_No"]
+              .toString()
+              .trimLeft()
+              .toLowerCase()
+              .contains(key.toLowerCase()))
+          .toList();
+
+      print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy$fbResulList");
+
+      notifyListeners();
+    } else {
+      isDelSearch = false;
+      delResulList = delList;
       notifyListeners();
     }
     notifyListeners();

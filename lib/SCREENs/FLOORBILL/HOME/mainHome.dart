@@ -1,12 +1,15 @@
 import 'package:floor_billing/SCREENs/ADDCUST/addcust.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/1deliverybill.dart';
+import 'package:floor_billing/SCREENs/FLOORBILL/HOME/DELIVERY/del1.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/deliverybill.dart';
 import 'package:floor_billing/components/textfldCommon.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainHome extends StatefulWidget {
   const MainHome({super.key});
@@ -14,6 +17,9 @@ class MainHome extends StatefulWidget {
   @override
   State<MainHome> createState() => _MainHomeState();
 }
+
+String date = "";
+String cn = "";
 
 class Menus {
   final String iconname;
@@ -26,17 +32,22 @@ class _MainHomeState extends State<MainHome> {
     Menus(iconname: 'CREATE CUSTOMER', iconimg: 'assets/Cus.png'),
     Menus(iconname: 'FLOOR BILL', iconimg: 'assets/Fb.png'),
     Menus(iconname: 'DELIVERY BILL', iconimg: 'assets/Del.png'),
-  // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
-  // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
-  // Menus(iconname: 'ITEM SEARCH', iconimg: 'assets/lock.png'),
-  
+    // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
+    // Menus(iconname: 'FREE/ALOT SlOT', iconimg: 'assets/lock.png'),
+    // Menus(iconname: 'ITEM SEARCH', iconimg: 'assets/lock.png'),
   ];
 
   @override
   void initState() {
     // TODO: implement initState
-
+    date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
     super.initState();
+  }
+
+  getcname() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    cn = prefs.getString("cname")!;
   }
 
   @override
@@ -62,10 +73,9 @@ class _MainHomeState extends State<MainHome> {
                     child: Container(
                       height: 100,
                       width: 280,
-                     
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                         color: Colors.amber,
+                        color: Colors.amber,
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -82,12 +92,20 @@ class _MainHomeState extends State<MainHome> {
                           child: Row(
                             children: [
                               SizedBox(
-                                height: 40,width: 40,
-                                child: Image.asset(l[index].iconimg.toString(),)),
-                                SizedBox(width: 20,),
+                                  height: 40,
+                                  width: 40,
+                                  child: Image.asset(
+                                    l[index].iconimg.toString(),
+                                  )),
+                              SizedBox(
+                                width: 20,
+                              ),
                               Text(
                                 l[index].iconname.toString(),
-                                style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 20),
                               ),
                             ],
                           ),
@@ -98,27 +116,29 @@ class _MainHomeState extends State<MainHome> {
                       if (index == 0) {
                         // Provider.of<Controller>(context, listen: false)
                         //     .getDeliveryBillList(0,context);
+                        Provider.of<Controller>(context, listen: false)
+                            .getCustData(date, "XXXXXX", context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ADDCUSTOMER()),
                         );
-                      }
-                     else if (index == 1) {
+                      } else if (index == 1) {
+                        getcname();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => HomeFloorBill()),
                         );
-                      } else if(index == 2) {
+                      } else if (index == 2) {
                         Provider.of<Controller>(context, listen: false)
-                            .getDeliveryBillList(0, context);
+                            .getDELList(0, context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => FirstDeleveryBill()),
                         );
-                      } 
+                      }
                     },
                   ),
                   SizedBox(
