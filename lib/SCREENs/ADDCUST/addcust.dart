@@ -1,4 +1,5 @@
 import 'package:floor_billing/components/custom_snackbar.dart';
+import 'package:floor_billing/components/printclass.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +26,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
   FocusNode bagFocus = FocusNode();
   String _scanBarcode = 'Unknown';
   String ep = "";
-
+  List printcust = [];
   @override
   void initState() {
     super.initState();
@@ -202,40 +203,72 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                       } else {
                         value.createFloorCardsNew(
                             date, value.ccname.text, value.ccfon.text, context);
+                               
+                                printcust.add(value.ccname.text);
+                                printcust.add(value.ccfon.text);
+                                
+                                
 
-                            // value.ccname.clear();
-                            // value.ccfon.clear();
-                            showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Customer Added ",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('OK'),
-                  onPressed: () async {
-                    
-                        Provider.of<Controller>(context, listen: false)
-                            .clearCardID("0");
-                            Provider.of<Controller>(context, listen: false).setcusnameAndPhone("", "", context);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+                        // value.ccname.clear();
+                        // value.ccfon.clear();
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Customer Added \n Want Print ?",
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('No'),
+                                  onPressed: () async {
+                                    Provider.of<Controller>(context,
+                                            listen: false)
+                                        .clearCardID("0");
+                                    Provider.of<Controller>(context,
+                                            listen: false)
+                                        .setcusnameAndPhone("", "", context);
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(context, '/mainpage');
+                                  },
+                                ),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('Yes'),
+                                  onPressed: () async {
+                                     printcust.add(value.card_id);
+                                print(printcust);
+                                    Provider.of<Controller>(context,
+                                            listen: false)
+                                        .clearCardID("0");
+                                    Provider.of<Controller>(context,
+                                            listen: false)
+                                        .setcusnameAndPhone("", "", context);
+                                     PrintReport printer = PrintReport();
+                                      printer.printReport(printcust,"cust");
+                                      Navigator.pop(context);
+                                      Navigator.pushNamed(
+                                          context, '/mainpage');
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }
                     },
                     style:
@@ -265,7 +298,14 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      
+ value.userAddButtonDisable(false);
+                          value.ccfon.clear();
+                          value.ccname.clear();
+                          value.card_id = "";
+                          value.setaDDUserError("");
+                    },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.green),
                     child: Padding(
@@ -273,7 +313,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                       child: Row(
                         children: [
                           Text(
-                            "PRINT",
+                            "Refresh",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17,
@@ -282,12 +322,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                           SizedBox(
                             width: 5,
                           ),
-                          Image.asset(
-                            "assets/print.png",
-                            color: Colors.black,
-                            height: 20,
-                            width: 20,
-                          ),
+                          Icon(Icons.refresh)
                         ],
                       ),
                     ),

@@ -54,8 +54,12 @@ String cn="";
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
     getcname();
-    // FunctionUtils.runFunctionPeriodically(context);
     Provider.of<Controller>(context, listen: false).clearCardID("0");
+    Provider.of<Controller>(context, listen: false)
+        .cardNoctrl.clear();
+    Provider.of<Controller>(context, listen: false).userAddButtonDisable(false);
+    // FunctionUtils.runFunctionPeriodically(context);
+    
     cardfocus.addListener(() {
       if (!cardfocus.hasFocus) {
         getCustdetails(Provider.of<Controller>(context, listen: false)

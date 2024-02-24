@@ -291,7 +291,7 @@ class _FloorBillWidgetState extends State<FloorBillWidget> {
                                               PrintReport printer =
                                                   PrintReport();
                                               printer.printReport(
-                                                  value.printingList);
+                                                  value.printingList,"bill");
 
                                               Navigator.of(context).pop();
                                             },

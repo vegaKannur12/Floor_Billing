@@ -133,6 +133,7 @@ class Controller extends ChangeNotifier {
   bool isvalidsale = false;
   bool isbagloading = false;
   bool igno = false;
+  bool itemloading = false;
   // Future<void> sendHeartbeat() async {
   //   try {
   //     if (SqlConn.isConnected) {
@@ -308,10 +309,7 @@ class Controller extends ChangeNotifier {
         // SqlConn.disconnect();
         Navigator.push(
           context,
-          MaterialPageRoute(
-              builder: (context) => MainHome(
-                   
-                  )),
+          MaterialPageRoute(builder: (context) => MainHome()),
         );
       } else {
         incorect = true;
@@ -762,11 +760,14 @@ class Controller extends ChangeNotifier {
     setBarerror("");
     barcodeinvalid = false;
     selectedBarcodeList.clear();
-
+    selectedBarcode = "";
+    barcodeList.clear();
     clearSelectedBarcode(context);
 
     notifyListeners();
     try {
+      itemloading = true;
+      notifyListeners();
       var res = await SqlConn.readData(
           "Flt_Sp_Get_Barcode_Item '$os','$barcodedata'");
       var map = jsonDecode(res);
@@ -796,6 +797,7 @@ class Controller extends ChangeNotifier {
               selectedBarcodeList.add(item);
             }
           }
+
           setshowdata(true);
           // notifyListeners();
           notifyListeners();
@@ -834,6 +836,8 @@ class Controller extends ChangeNotifier {
         print("Selected BarcodeList----^^^___$selectedBarcodeList");
         notifyListeners();
       }
+      itemloading = false;
+      notifyListeners();
       // throw PlatformException(
       //   code: 'ERROR',
       //   message: 'Network error IOException: failed to connect...',
@@ -1624,7 +1628,7 @@ class Controller extends ChangeNotifier {
 
         prefs.setInt("CardID", map[0]['Card_ID']);
         card_id = map[0]['Card_ID'].toString();
-
+        notifyListeners();
         cardNoctrl.text = map[0]['Card_Name'].toString().trimLeft();
         setcusnameAndPhone(cn, ph, context);
         userAddButtonDisable(false);
@@ -2023,6 +2027,7 @@ class Controller extends ChangeNotifier {
 //////////////////////////////////////////////
   clearCardID(String c) {
     card_id = c;
+    
     cardNoctrl.clear();
     ccfon.clear();
     ccname.clear();
@@ -2127,65 +2132,65 @@ class Controller extends ChangeNotifier {
       }
       print("delList-----$res");
       print("sorted====>$sortedDelvryList");
-      Map so = {
-        1237: [
-          {
-            'Bill_No': 1237,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 1237,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-        123757: [
-          {
-            'Bill_No': 123757,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 123757,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-      };
-      getDelwidget(so, context);
+      // Map so = {
+      //   1237: [
+      //     {
+      //       'Bill_No': 1237,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 1237,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      //   123757: [
+      //     {
+      //       'Bill_No': 123757,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 123757,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      // };
+      getDelwidget(sortedDelvryList, context);
       // getDelwidget(sortedDelvryList,context);
       notifyListeners();
     } on PlatformException catch (e) {

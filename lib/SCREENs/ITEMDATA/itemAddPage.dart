@@ -367,18 +367,14 @@ class _ItemAddPageState extends State<ItemAddPage> {
                             ),
                           ],
                         ),
-                        value.barcodeinvalid == false &&
-                                    value.selectedBarcodeList.isEmpty ||
-                                value.barcodeList.isEmpty
-                            ? Expanded(
-                                child: Center(
-                                  child: Image.asset(
-                                    "assets/nothing.png",
-                                    height: 70,
-                                    width: 60,
-                                  ),
-                                ),
-                              )
+                          value.itemloading
+                      
+                            ? 
+                            Expanded(
+                                    child: SpinKitCircle(size: 50,
+                                    color: Colors.blue,
+                                  ))
+                           
                             // ? Row(
                             //     children: [
                             //       SizedBox(
@@ -387,9 +383,22 @@ class _ItemAddPageState extends State<ItemAddPage> {
                             //           child: value.barcodeerror)
                             //     ],
                             //   )
-                            : value.showdata &&
-                                    value.selectedBarcodeList.isNotEmpty
-                                ? Expanded(
+                            : 
+                            // value.showdata &&
+                            //         value.selectedBarcodeList.isNotEmpty ||
+                              value.barcodeinvalid == false &&
+                                    value.selectedBarcodeList.isEmpty ||
+                                value.barcodeList.isEmpty
+                                ?  Expanded(
+                                child: Center(
+                                  child: Image.asset(
+                                    "assets/nothing.png",
+                                    height: 70,
+                                    width: 60,
+                                  ),
+                                ),
+                              )
+                                : Expanded(
                                     child: Container(
                                       color: Colors.orange[50],
                                       child: ListView.builder(
@@ -858,9 +867,9 @@ class _ItemAddPageState extends State<ItemAddPage> {
                                           }),
                                     ),
                                   )
-                                : Container(
-                                    child: Text(""), ////nodar
-                                  )
+                        // : Container(
+                        //     child: Text(""), ////nodar
+                        //   )
                       ],
                     ),
                   ),

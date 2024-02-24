@@ -16,7 +16,7 @@ class ViewCartPage extends StatefulWidget {
 
 class _ViewCartPageState extends State<ViewCartPage> {
   String date = "";
-   bool _printDialogShown = false; 
+  bool _printDialogShown = false;
   void initState() {
     super.initState();
     date = DateFormat('dd-MMM-yyyy').format(DateTime.now());
@@ -111,64 +111,63 @@ class _ViewCartPageState extends State<ViewCartPage> {
                               .getUsedBagsItems(context, date.toString(), 0);
                           Provider.of<Controller>(context, listen: false)
                               .getUnsavedCart(context);
-                               if (!_printDialogShown) {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Want Print ?",
-                                      style: TextStyle(fontSize: 18),
+                          if (!_printDialogShown) {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Want Print ?",
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('No'),
+                                      onPressed: () async {
+                                        Provider.of<Controller>(context,
+                                                listen: false)
+                                            .clearCardID("0");
+                                        Navigator.pop(context);
+                                        Navigator.pushNamed(
+                                            context, '/floorhome');
+                                      },
+                                    ),
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      child: const Text('Yes'),
+                                      onPressed: () async {
+                                        Provider.of<Controller>(context,
+                                                listen: false)
+                                            .clearCardID("0");
+                                        PrintReport printer = PrintReport();
+                                        printer.printReport(
+                                            value.printingList, "bill");
+                                        Navigator.pop(context);
+                                        Navigator.pushNamed(
+                                            context, '/floorhome');
+                                      },
                                     ),
                                   ],
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    style: TextButton.styleFrom(
-                                      textStyle: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge,
-                                    ),
-                                    child: const Text('No'),
-                                    onPressed: () async {
-                                      Provider.of<Controller>(context,
-                                              listen: false)
-                                          .clearCardID("0");
-                                          Navigator.pop(context);
-                                      Navigator.pushNamed(
-                                          context, '/floorhome');
-                                      
-                                    },
-                                  ),
-                                  TextButton(
-                                    style: TextButton.styleFrom(
-                                      textStyle: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge,
-                                    ),
-                                    child: const Text('Yes'),
-                                    onPressed: () async {
-                                      Provider.of<Controller>(context,
-                                              listen: false)
-                                          .clearCardID("0");
-                                      PrintReport printer = PrintReport();
-                                      printer.printReport(value.printingList);
-                                      Navigator.pop(context);
-                                      Navigator.pushNamed(
-                                          context, '/floorhome');
-                                         
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                          _printDialogShown = true;
-                        }
+                                );
+                              },
+                            );
+                            _printDialogShown = true;
+                          }
                           // setState(() {});
                         },
                         icon: Icon(Icons.shopping_cart),
@@ -183,7 +182,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
             children: [
               Expanded(
                 child: ListView.builder(
-                    shrinkWrap: true,scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
                     itemCount: value.unsavedList.length,
                     itemBuilder: (context, index) {
                       return Padding(
@@ -213,12 +213,14 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                           children: [
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Text(
                                                   "\u20B9 ${value.unsavedList[index]["Cart_Rate"].toStringAsFixed(2)} ",
                                                   style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontSize: 18),
                                                 ),
                                                 Row(
@@ -247,7 +249,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                             Divider(),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Row(
                                                   children: [
@@ -278,7 +281,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                                   'Delete ${value.unsavedList[index]["Prod_Name"].toString().trimLeft()}?'),
                                                               actions: <Widget>[
                                                                 new TextButton(
-                                                                  onPressed: () {
+                                                                  onPressed:
+                                                                      () {
                                                                     Navigator.of(
                                                                             context,
                                                                             rootNavigator:
@@ -286,11 +290,12 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                                         .pop(
                                                                             false); // dismisses only the dialog and returns false
                                                                   },
-                                                                  child:
-                                                                      Text('No'),
+                                                                  child: Text(
+                                                                      'No'),
                                                                 ),
                                                                 TextButton(
-                                                                  onPressed: () {
+                                                                  onPressed:
+                                                                      () {
                                                                     Provider.of<Controller>(context, listen: false).updateCart(
                                                                         context,
                                                                         date
@@ -300,17 +305,17 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                                         value.unsavedList[index]
                                                                             [
                                                                             "Cart_Row"],
-                                                                        value.unsavedList[index]["Cart_Batch"]
+                                                                        value
+                                                                            .unsavedList[index][
+                                                                                "Cart_Batch"]
                                                                             .toString()
                                                                             .trim(),
                                                                         double.parse(value
-                                                                            .unsavedList[index]
-                                                                                [
+                                                                            .unsavedList[index][
                                                                                 "Cart_Qty"]
                                                                             .toString()),
                                                                         double.parse(value
-                                                                            .unsavedList[index]
-                                                                                ["Cart_Disc_Per"]
+                                                                            .unsavedList[index]["Cart_Disc_Per"]
                                                                             .toString()),
                                                                         1);
                                                                     Provider.of<Controller>(
@@ -322,8 +327,8 @@ class _ViewCartPageState extends State<ViewCartPage> {
                                                                     Navigator.pop(
                                                                         context);
                                                                   },
-                                                                  child:
-                                                                      Text('Yes'),
+                                                                  child: Text(
+                                                                      'Yes'),
                                                                 ),
                                                               ],
                                                             );

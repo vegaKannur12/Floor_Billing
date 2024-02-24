@@ -52,102 +52,111 @@ class _MainHomeState extends State<MainHome> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.amber,
-      // appBar: AppBar(
-      //   backgroundColor: Colors.yellow,
-      //   elevation: 0,
-      // ),
-      body: SafeArea(
-          child: Center(
-        child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: l.length,
-            itemBuilder: (context, index) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    child: Container(
-                      height: 100,
-                      width: 280,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.amber,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color.fromARGB(255, 49, 83, 121),
-                            Colors.black87,
-                          ],
-                          stops: [0.112, 0.789],
-                        ),
-                      ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                  height: 40,
-                                  width: 40,
-                                  child: Image.asset(
-                                    l[index].iconimg.toString(),
-                                  )),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Text(
-                                l[index].iconname.toString(),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 20),
-                              ),
+    return PopScope(
+       canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (!didPop) {
+          Navigator.of(context).pop(true);
+          // Navigator.pushNamed(context, '/mainpage');
+        }
+      },
+      child: SafeArea(
+          child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.amber,
+        // appBar: AppBar(
+        //   backgroundColor: Colors.yellow,
+        //   elevation: 0,
+        // ),
+        body: SafeArea(
+            child: Center(
+          child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: l.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      child: Container(
+                        height: 100,
+                        width: 280,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.amber,
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color.fromARGB(255, 49, 83, 121),
+                              Colors.black87,
                             ],
+                            stops: [0.112, 0.789],
+                          ),
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                    height: 40,
+                                    width: 40,
+                                    child: Image.asset(
+                                      l[index].iconimg.toString(),
+                                    )),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                Text(
+                                  l[index].iconname.toString(),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                      onTap: () {
+                        if (index == 0) {
+                          // Provider.of<Controller>(context, listen: false)
+                          //     .getDeliveryBillList(0,context);
+                          Provider.of<Controller>(context, listen: false)
+                              .getCustData(date, "XXXXXX", context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ADDCUSTOMER()),
+                          );
+                        } else if (index == 1) {
+                          getcname();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HomeFloorBill()),
+                          );
+                        } else if (index == 2) {
+                          Provider.of<Controller>(context, listen: false)
+                              .getDELList(0, context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FirstDeleveryBill()),
+                          );
+                        }
+                      },
                     ),
-                    onTap: () {
-                      if (index == 0) {
-                        // Provider.of<Controller>(context, listen: false)
-                        //     .getDeliveryBillList(0,context);
-                        Provider.of<Controller>(context, listen: false)
-                            .getCustData(date, "XXXXXX", context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ADDCUSTOMER()),
-                        );
-                      } else if (index == 1) {
-                        getcname();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HomeFloorBill()),
-                        );
-                      } else if (index == 2) {
-                        Provider.of<Controller>(context, listen: false)
-                            .getDELList(0, context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FirstDeleveryBill()),
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  )
-                ],
-              );
-            }),
+                    SizedBox(
+                      height: 10,
+                    )
+                  ],
+                );
+              }),
+        )),
       )),
-    ));
+    );
   }
 }

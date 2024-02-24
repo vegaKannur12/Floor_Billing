@@ -123,7 +123,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/floorhome': (context) => HomeFloorBill(),
-        // '/mainpage': (context) => MainHome(),
+        '/mainpage': (context) => MainHome(),
       },
       home: SplashScreen(),
       // LoginPage(),

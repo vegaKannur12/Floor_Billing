@@ -25,7 +25,7 @@ class PrintReport {
   }
 
   //////////////////////////////////////////////
-  Future<void> saleReportPrint(List result) async {
+  Future<void> billPrint(List result) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cName = prefs.getString("cname");
     Set<String> ss = result.map((e) => e['Series'].toString().trim()).toSet();
@@ -217,6 +217,63 @@ class PrintReport {
             align: SunmiPrintAlign.CENTER,
             fontSize: SunmiFontSize.XL));
   }
+ Future<void> custPrint(List result) async {
+   
+   print(result[0].toString());
+    
+    await SunmiPrinter.lineWrap(1);
+
+    await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+    await SunmiPrinter.printBarCode(result[3].toString().trimLeft(),
+        barcodeType: SunmiBarcodeType.CODE128,
+        textPosition: SunmiBarcodeTextPos.NO_TEXT,
+        height: 80,
+        width: 4);
+    await SunmiPrinter.lineWrap(0);
+    await SunmiPrinter.printText(
+      "Customer#  ${result[3].toString().trimLeft()}",
+      style: SunmiStyle(
+          align: SunmiPrintAlign.CENTER,
+          bold: true,
+          fontSize: SunmiFontSize.LG),
+    );
+    await SunmiPrinter.printRow(cols: [
+      ColumnMaker(
+        text: "Name ",
+        width: 10,
+        align: SunmiPrintAlign.LEFT,
+      ),
+      ColumnMaker(
+        text: ":",
+        width: 2,
+        align: SunmiPrintAlign.LEFT,
+      ),
+      ColumnMaker(
+        text: result[0].toString().trimLeft(),
+        width: 25,
+        align: SunmiPrintAlign.LEFT,
+      ),
+    ]);
+    await SunmiPrinter.printRow(cols: [
+      ColumnMaker(
+        text: "Phone",
+        width: 10,
+        align: SunmiPrintAlign.LEFT,
+      ),
+      ColumnMaker(
+        text: ":",
+        width: 2,
+        align: SunmiPrintAlign.LEFT,
+      ),
+      ColumnMaker(
+        text: result[1].toString(),
+        width: 25,
+        align: SunmiPrintAlign.LEFT,
+      ),
+    ]);
+
+    await SunmiPrinter.lineWrap(1); // creates one line space
+ }
 
   Future<void> secondpart(List result) async {
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
@@ -243,11 +300,18 @@ class PrintReport {
     await SunmiPrinter.unbindingPrinter();
   }
 
-  Future<void> printReport(List reportData) async {
+  Future<void> printReport(List reportData,String typ) async {
     print("printdata--${reportData}");
     await initialize();
-
-    await saleReportPrint(reportData);
+if (typ=="bill") 
+{
+  await billPrint(reportData);
+}
+else
+{
+await custPrint(reportData);
+}
+    
 
     await SunmiPrinter.lineWrap(3);
     await SunmiPrinter.submitTransactionPrint();
