@@ -37,7 +37,8 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
         title: Text("DELIVERY BILL"),
       ),
       body: Consumer<Controller>(
-        builder: (context, value, child) => Column(
+        builder: (context, value, child) => 
+        Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(10),
@@ -116,20 +117,24 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
                 ],
               ),
             ),
-
+      
             //  value.isDelSearch
             //           ? Expanded(
             //               child: DeliveryBillWid(list: value.delResulList),
             //             )
             //           :
-
+      
             Expanded(
-                child: ListView.builder(
-                    itemCount: value.delWidget.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return value.delWidget[index];
-                    }))
-
+              child: ListView.builder(
+                //  shrinkWrap: true,
+                //   scrollDirection: Axis.vertical,
+                //  physics: NeverScrollableScrollPhysics(),
+                  itemCount: value.delWidget.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return value.delWidget[index];
+                  }),
+            )
+      
             // Expanded(child: DeliveryBillWidget(dellist: value.resultList)),
             // value.isSearch
             //         ? Expanded(

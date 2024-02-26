@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/homeFloorBilling.dart';
 import 'package:floor_billing/SCREENs/FLOORBILL/HOME/mainHome.dart';
 import 'package:floor_billing/SCREENs/db_selection.dart';
@@ -134,6 +135,8 @@ class Controller extends ChangeNotifier {
   bool isbagloading = false;
   bool igno = false;
   bool itemloading = false;
+  bool cartloading = false;
+  bool fbListLoading=false;
   // Future<void> sendHeartbeat() async {
   //   try {
   //     if (SqlConn.isConnected) {
@@ -294,7 +297,7 @@ class Controller extends ChangeNotifier {
           "Flt_Sp_Verify_User '$os','$userName','$password'");
       var valueMap = json.decode(res);
       print("item list----------$res");
-      if (valueMap.isNotEmpty) {
+      if (valueMap.isNotEmpty && valueMap != null) {
         print("user dataa----------$res");
         print(
             "UserID >>>>>> ${valueMap[0]["UserID"]}----Displynam>>>>> ${valueMap[0]["Flt_Display_Name"]}");
@@ -307,17 +310,19 @@ class Controller extends ChangeNotifier {
         await getSalesman();
         await setUID();
         // SqlConn.disconnect();
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MainHome()),
-        );
+        incorect = false;
+        notifyListeners();
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => MainHome()),
+        // );
       } else {
         incorect = true;
         notifyListeners();
-        CustomSnackbar snackbar = CustomSnackbar();
-        snackbar.showSnackbar(context, "Incorrect Username or Password", "");
-        isLoginLoading = false;
-        notifyListeners();
+        // CustomSnackbar snackbar = CustomSnackbar();
+        // snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+        // isLoginLoading = false;
+        // notifyListeners();
       }
 
       isLoginLoading = false;
@@ -361,19 +366,32 @@ class Controller extends ChangeNotifier {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     } finally {
-      if (SqlConn.isConnected) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? os = prefs.getString("os");
-        String? cn = prefs.getString("cname");
-        // If connected, do not pop context as it may dismiss the error dialog
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MainHome()),
-        );
+      if (SqlConn.isConnected == false) {
+        print("hi");
+        //   // SharedPreferences prefs = await SharedPreferences.getInstance();
+        //   // String? os = prefs.getString("os");
+        //   // String? cn = prefs.getString("cname");
+        //   // if (incorect) {
+        //   //   CustomSnackbar snackbar = CustomSnackbar();
+        //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+        //   //   //  Navigator.pop(context);
+        //   //   exit(0);
+        //   // } else {
+        //   //   Navigator.push(
+        //   //     context,
+        //   //     MaterialPageRoute(builder: (context) => MainHome()),
+        //   //   );
+        //   // }
+        //   // If connected, do not pop context as it may dismiss the error dialog
 
-        debugPrint("Database connected, not popping context.");
-      } else {
+        //   // Navigator.push(
+        //   //   context,
+        //   //   MaterialPageRoute(builder: (context) => MainHome()),
+        //   // );
+
+        //   debugPrint("Database connected, not popping context.");
+        // }
+        //  else {
         // If not connected, pop context to dismiss the dialog
         showDialog(
           context: context,
@@ -1358,6 +1376,8 @@ class Controller extends ChangeNotifier {
             },
           );
           print("update Map------------>>$map");
+          clearSelectedBarcode(context);
+          notifyListeners();
         }
       } else {
         print(
@@ -1617,7 +1637,7 @@ class Controller extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     os = await prefs.getString("os");
-
+print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
     try {
       var res = await SqlConn.readData(
           "Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
@@ -1708,7 +1728,7 @@ class Controller extends ChangeNotifier {
     } finally {
       if (SqlConn.isConnected) {
         // If connected, do not pop context as it may dismiss the error dialog
-        Navigator.pop(context);
+        // Navigator.pop(context);
         // Navigator.push(
         //   context,
         //   MaterialPageRoute(builder: (context) => MainHome()),
@@ -1914,10 +1934,12 @@ class Controller extends ChangeNotifier {
       'os ----- $os, cardId ------->$card_id, cart No----------$cart_id',
     );
     // await initYearsDb(context, "");
-    len = 0;
+    
     unsavedList.clear();
     notifyListeners();
     try {
+       cartloading = true;
+      notifyListeners();
       var res = await SqlConn.readData(
           "Flt_Sp_Get_Unsaved_FBCart '$cart_id','$card_id','$os'");
       var map = jsonDecode(res);
@@ -1927,7 +1949,7 @@ class Controller extends ChangeNotifier {
       for (var item in map) {
         unsavedList.add(item);
       }
-      len = unsavedList.length;
+     
       notifyListeners();
       qty =
           List.generate(unsavedList.length, (index) => TextEditingController());
@@ -1944,6 +1966,8 @@ class Controller extends ChangeNotifier {
         print('unsaved total :$unsaved_tot');
         notifyListeners();
       }
+       cartloading = false;
+     
       notifyListeners();
     }
     // on PlatformException catch (e) {
@@ -2027,13 +2051,15 @@ class Controller extends ChangeNotifier {
 //////////////////////////////////////////////
   clearCardID(String c) {
     card_id = c;
-    
+
     cardNoctrl.clear();
     ccfon.clear();
     ccname.clear();
     usedbagITEMList.clear();
     len = 0;
     unsavedList.clear();
+    itemSortedList.clear;
+    setbagerror("");
 
     notifyListeners();
   }
@@ -2045,7 +2071,8 @@ class Controller extends ChangeNotifier {
     card_id == "" ? car = 0 : car = int.parse(card_id);
 
     print("tabl para------$date----$os----$car");
-    try {
+    try {fbListLoading=true;
+    notifyListeners();
       var res = await SqlConn.readData("Flt_Sp_Get_Fb_List '$date',$car,'$os'");
       var map = jsonDecode(res);
       fbList.clear();
@@ -2057,45 +2084,72 @@ class Controller extends ChangeNotifier {
         isSearch = false;
       }
       print("fbList-----$res");
-
+fbListLoading=false;
+ 
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  // Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    } 
+   
+     catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
+    if (SqlConn.isConnected == false) {
+        print("hi");
+        //   // SharedPreferences prefs = await SharedPreferences.getInstance();
+        //   // String? os = prefs.getString("os");
+        //   // String? cn = prefs.getString("cname");
+        //   // if (incorect) {
+        //   //   CustomSnackbar snackbar = CustomSnackbar();
+        //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+        //   //   //  Navigator.pop(context);
+        //   //   exit(0);
+        //   // } else {
+        //   //   Navigator.push(
+        //   //     context,
+        //   //     MaterialPageRoute(builder: (context) => MainHome()),
+        //   //   );
+        //   // }
+        //   // If connected, do not pop context as it may dismiss the error dialog
+
+        //   // Navigator.push(
+        //   //   context,
+        //   //   MaterialPageRoute(builder: (context) => MainHome()),
+        //   // );
+
+        //   debugPrint("Database connected, not popping context.");
+        // }
+        //  else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
   }
 
   getDELList(int b_no, BuildContext context) async {
@@ -2132,239 +2186,356 @@ class Controller extends ChangeNotifier {
       }
       print("delList-----$res");
       print("sorted====>$sortedDelvryList");
-      // Map so = {
-      //   1237: [
-      //     {
-      //       'Bill_No': 1237,
-      //       'Bill_Date': '2024-02-23 00:00:00.0',
-      //       'Amount': 12886.0,
-      //       'CardID': 5007,
-      //       'CardNo': 'HJ004',
-      //       'Cust_Name': 'dhanush',
-      //       'Cust_Phone': 9544533972,
-      //       'Fb_No': 21,
-      //       'Slot_ID': 19,
-      //       'Slot_Name': 'D1',
-      //       'Paid': 1,
-      //     },
-      //     {
-      //       'Bill_No': 1237,
-      //       'Bill_Date': '2024-02-23 00:00:00.0',
-      //       'Amount': 12886.0,
-      //       'CardID': 5007,
-      //       'CardNo': 'HJ004',
-      //       'Cust_Name': 'dhanush',
-      //       'Cust_Phone': 9544533972,
-      //       'Fb_No': 20,
-      //       'Slot_ID': 20,
-      //       'Slot_Name': 'D2',
-      //       'Paid': 1,
-      //     },
-      //   ],
-      //   123757: [
-      //     {
-      //       'Bill_No': 123757,
-      //       'Bill_Date': '2024-02-23 00:00:00.0',
-      //       'Amount': 12886.0,
-      //       'CardID': 5007,
-      //       'CardNo': 'HJ004',
-      //       'Cust_Name': 'dhanush',
-      //       'Cust_Phone': 9544533972,
-      //       'Fb_No': 21,
-      //       'Slot_ID': 19,
-      //       'Slot_Name': 'D1',
-      //       'Paid': 1,
-      //     },
-      //     {
-      //       'Bill_No': 123757,
-      //       'Bill_Date': '2024-02-23 00:00:00.0',
-      //       'Amount': 12886.0,
-      //       'CardID': 5007,
-      //       'CardNo': 'HJ004',
-      //       'Cust_Name': 'dhanush',
-      //       'Cust_Phone': 9544533972,
-      //       'Fb_No': 20,
-      //       'Slot_ID': 20,
-      //       'Slot_Name': 'D2',
-      //       'Paid': 1,
-      //     },
-      //   ],
-      // };
-      getDelwidget(sortedDelvryList, context);
-      // getDelwidget(sortedDelvryList,context);
+      Map so = {
+        1237: [
+          {
+            'Bill_No': 1237,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 1237,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+        123757: [
+          {
+            'Bill_No': 123757,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 123757,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+        34566: [
+          {
+            'Bill_No': 34566,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 34566,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+        99999: [
+          {
+            'Bill_No': 99999,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 21,
+            'Slot_ID': 19,
+            'Slot_Name': 'D1',
+            'Paid': 1,
+          },
+          {
+            'Bill_No': 99999,
+            'Bill_Date': '2024-02-23 00:00:00.0',
+            'Amount': 12886.0,
+            'CardID': 5007,
+            'CardNo': 'HJ004',
+            'Cust_Name': 'dhanush',
+            'Cust_Phone': 9544533972,
+            'Fb_No': 20,
+            'Slot_ID': 20,
+            'Slot_Name': 'D2',
+            'Paid': 1,
+          },
+        ],
+      };
+      // getDelwidget(sortedDelvryList, context);
+      getDelwidget(so, context);
       notifyListeners();
-    } on PlatformException catch (e) {
-      print("PlatformException occurredcttr: $e");
-      SqlConn.disconnect();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Connection Lost...! ",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Reconnect'),
-                onPressed: () async {
-                  await initYearsDb(context, "");
-                  // Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      print(e);
-      return null;
-    } catch (e) {
+    } 
+    // on PlatformException catch (e) {
+    //   print("PlatformException occurredcttr: $e");
+    //   SqlConn.disconnect();
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               "Connection Lost...! ",
+    //               style: TextStyle(fontSize: 18),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: <Widget>[
+    //           TextButton(
+    //             style: TextButton.styleFrom(
+    //               textStyle: Theme.of(context).textTheme.labelLarge,
+    //             ),
+    //             child: const Text('Reconnect'),
+    //             onPressed: () async {
+    //               await initYearsDb(context, "");
+    //               // Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   print(e);
+    //   return null;
+    // } 
+    catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
+    if (SqlConn.isConnected == false) {
+        print("hi");
+        //   // SharedPreferences prefs = await SharedPreferences.getInstance();
+        //   // String? os = prefs.getString("os");
+        //   // String? cn = prefs.getString("cname");
+        //   // if (incorect) {
+        //   //   CustomSnackbar snackbar = CustomSnackbar();
+        //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+        //   //   //  Navigator.pop(context);
+        //   //   exit(0);
+        //   // } else {
+        //   //   Navigator.push(
+        //   //     context,
+        //   //     MaterialPageRoute(builder: (context) => MainHome()),
+        //   //   );
+        //   // }
+        //   // If connected, do not pop context as it may dismiss the error dialog
+
+        //   // Navigator.push(
+        //   //   context,
+        //   //   MaterialPageRoute(builder: (context) => MainHome()),
+        //   // );
+
+        //   debugPrint("Database connected, not popping context.");
+        // }
+        //  else {
+        // If not connected, pop context to dismiss the dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Not Connected.!",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  SpinKitCircle(
+                    color: Colors.green,
+                  )
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await initYearsDb(context, "");
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Connect'),
+                ),
+              ],
+            );
+          },
+        );
+        debugPrint("Database not connected, popping context.");
+      }
   }
 
   getDelwidget(Map sorted, BuildContext context) {
-    delWidget.add(Expanded(
-      child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: sorted.keys.length,
-          itemBuilder: (context, index) {
-            final billNo = sorted.keys.elementAt(index);
-            final billDetails = sorted[billNo]!;
-            double amt = billDetails[index]['Amount'];
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Bill No# $billNo',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+    print("====fhhhhhhhh");
+
+    delWidget.add(ListView.builder(
+        shrinkWrap: true,
+        //             scrollDirection: Axis.vertical,
+        // shrinkWrap: true, physics: ScrollPhysics(),scrollDirection: Axis.vertical,
+        itemCount: sorted.keys.length,
+        itemBuilder: (context, index) {
+          final billNo = sorted.keys.elementAt(index);
+          List<Map<String, dynamic>> billDetails = sorted[billNo]!;
+          // double amt = billDetails[index]['Amount'];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Bill No# $billNo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
-                      Text(
-                        "${amt.toStringAsFixed(2)} \u20B9 ",
-                        // widget.slotname,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18),
-                      )
-                    ],
-                  ),
+                    ),
+                    // Text(
+                    //   "${amt.toStringAsFixed(2)} \u20B9 ",
+                    //   // widget.slotname,
+                    //   style:
+                    //       TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    // )
+                  ],
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: billDetails.length,
-                  itemBuilder: (context, index) {
-                    final details = billDetails[index];
-                    return Container(
-                      height: 40,
-                      child: ListTile(
-                        subtitle: Column(
-                          children: [
-                            // Text('Slot Name: ${details['Slot_Name']}'),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Image.asset(
-                                      "assets/card.png",
-                                      height: 20,
-                                      width: 20,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(
-                                      details['CardNo'].toString().trimLeft(),
-                                      // widget.slotname,
-                                      style: TextStyle(fontSize: 18),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  width: 30,
-                                ),
-                                Row(
-                                  children: [
-                                    Image.asset(
-                                      "assets/bagimg.png",
-                                      color: Color.fromARGB(255, 61, 131, 63),
-                                      height: 27,
-                                      width: 27,
-                                    ),
-                                    Text(
-                                      details['Slot_Name']
-                                          .toString()
-                                          .trimLeft(),
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500),
-                                    )
-                                  ],
-                                ),
-                                Text("FB# ${details['Fb_No'].toString()}",
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                 physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: billDetails.length,
+                itemBuilder: (context, index) {
+                  Map details = billDetails[index];
+                  return Container(
+                    height: 40,
+                    child: ListTile(
+                      subtitle: Column(
+                        children: [
+                          // Text('Slot Name: ${details['Slot_Name']}'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/card.png",
+                                    height: 20,
+                                    width: 20,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    details['CardNo'].toString().trimLeft(),
+                                    // widget.slotname,
+                                    style: TextStyle(fontSize: 18),
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                width: 30,
+                              ),
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/bagimg.png",
+                                    color: Color.fromARGB(255, 61, 131, 63),
+                                    height: 27,
+                                    width: 27,
+                                  ),
+                                  Text(
+                                    details['Slot_Name'].toString().trimLeft(),
                                     style: TextStyle(
                                         fontSize: 15,
-                                        fontWeight: FontWeight.w500))
-                              ],
-                            ),
-                          ],
-                        ),
-                        // Add more details to display if needed
-                      ),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        height: 35,
-                        width: 100,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            getDelivery(billNo, context);
-                            Provider.of<Controller>(context, listen: false)
-                                .getDELList(0, context);
-                            CustomSnackbar snackbar = CustomSnackbar();
-                            snackbar.showSnackbar(
-                                context, "Item Delevered...", "");
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent),
-                          child: Text(
-                            "DELIVER",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                                color: Theme.of(context).secondaryHeaderColor),
+                                        fontWeight: FontWeight.w500),
+                                  )
+                                ],
+                              ),
+                              Text("FB# ${details['Fb_No'].toString()}",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500))
+                            ],
                           ),
+                        ],
+                      ),
+                      // Add more details to display if needed
+                    ),
+                  );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      height: 35,
+                      width: 100,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          getDelivery(billNo, context);
+                          Provider.of<Controller>(context, listen: false)
+                              .getDELList(0, context);
+                          CustomSnackbar snackbar = CustomSnackbar();
+                          snackbar.showSnackbar(
+                              context, "Item Delevered...", "");
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent),
+                        child: Text(
+                          "DELIVER",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Theme.of(context).secondaryHeaderColor),
                         ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            );
-          }),
-    ));
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          );
+        }));
   }
 
 /////////////////////////////////////
@@ -2523,6 +2694,7 @@ class Controller extends ChangeNotifier {
 
     if (key != null) {
       isSearch = true;
+      fbListLoading=true;
       notifyListeners();
       fbResulList = fbList
           .where((e) => e["CardNo"]
@@ -2533,11 +2705,15 @@ class Controller extends ChangeNotifier {
           .toList();
 
       print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy$fbResulList");
-
+fbListLoading=false;
       notifyListeners();
-    } else {
+    } 
+    else 
+    {
+
       isSearch = false;
       fbResulList = fbList;
+
       notifyListeners();
     }
     notifyListeners();

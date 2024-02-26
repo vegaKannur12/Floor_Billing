@@ -124,8 +124,8 @@ class _MainHomeState extends State<MainHome> {
                         if (index == 0) {
                           // Provider.of<Controller>(context, listen: false)
                           //     .getDeliveryBillList(0,context);
-                          Provider.of<Controller>(context, listen: false)
-                              .getCustData(date, "XXXXXX", context);
+                          // Provider.of<Controller>(context, listen: false)
+                          //     .getCustData(date, "XXXXXX", context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(

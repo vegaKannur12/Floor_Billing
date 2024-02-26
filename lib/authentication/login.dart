@@ -1,3 +1,4 @@
+import 'package:floor_billing/SCREENs/FLOORBILL/HOME/mainHome.dart';
 import 'package:floor_billing/components/custom_snackbar.dart';
 import 'package:floor_billing/components/textfldCommon.dart';
 import 'package:floor_billing/controller/controller.dart';
@@ -125,16 +126,32 @@ class _LoginPageState extends State<LoginPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: () {
-                                      Provider.of<Controller>(context,
-                                              listen: false)
-                                          .getLogin(username.text,
-                                              password.text, context);
-                                     
+                                    onPressed: () async{
+                                    //  await Provider.of<Controller>(context,
+                                    //           listen: false)
+                                    //       .getLogin(username.text,
+                                    //           password.text, context);
+
                                       //commnted
-                                      //  Provider.of<Controller>(context, listen: false)
-                                      //     .getLogin(
-                                      //         'floor4','997', context);
+                                       Provider.of<Controller>(context, listen: false)
+                                          .getLogin(
+                                              'floor4','997', context);
+                                      if (Provider.of<Controller>(context,
+                                              listen: false)
+                                          .incorect) {
+                                        CustomSnackbar snackbar =
+                                            CustomSnackbar();
+                                        snackbar.showSnackbar(
+                                            context,
+                                            "Incorrect Username or Password",
+                                            "");
+                                      } else {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => MainHome()),
+                                        );
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:

@@ -2,6 +2,7 @@ import 'package:floor_billing/components/printclass.dart';
 import 'package:floor_billing/controller/controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +28,6 @@ class _ViewCartPageState extends State<ViewCartPage> {
     //     salespresent();
     //   }
     // });
-    Provider.of<Controller>(context, listen: false).getUnsavedCart(context);
   }
 
   @override
@@ -71,24 +71,25 @@ class _ViewCartPageState extends State<ViewCartPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
-        height: 80,
-        width: size.width,
-        decoration: BoxDecoration(
-          color: Provider.of<Controller>(context, listen: false)
-                      .unsavedList
-                      .length !=
-                  0
-              ? Colors.white
-              : Colors.amber,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(5),
-            topRight: Radius.circular(5),
+      bottomNavigationBar: Consumer<Controller>(
+        builder: (context, value, child) => Container(
+          padding: EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
+          height: 80,
+          width: size.width,
+          decoration: BoxDecoration(
+            color: Provider.of<Controller>(context, listen: false)
+                    .unsavedList
+                    .isEmpty
+                ? Colors.white
+                : Colors.amber,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(5),
+              topRight: Radius.circular(5),
+            ),
           ),
-        ),
-        child: Consumer<Controller>(
-            builder: (context, value, child) => Row(
+          child: value.unsavedList.isEmpty
+              ? Row()
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
@@ -173,13 +174,20 @@ class _ViewCartPageState extends State<ViewCartPage> {
                         icon: Icon(Icons.shopping_cart),
                         label: Text("SAVE CART"))
                   ],
-                )),
+                ),
+        ),
       ),
       body: Consumer<Controller>(
         builder: (BuildContext context, Controller value, Widget? child) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+                value.cartloading
+                            ? Expanded(
+                                child: SpinKitCircle(
+                                size: 50,
+                                color: Colors.blue,
+                              )):
               Expanded(
                 child: ListView.builder(
                     shrinkWrap: true,

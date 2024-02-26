@@ -224,19 +224,20 @@ class PrintReport {
     await SunmiPrinter.lineWrap(1);
 
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    await SunmiPrinter.printBarCode(result[3].toString().trimLeft(),
+    await SunmiPrinter.printBarCode(result[2].toString().trimLeft(),
         barcodeType: SunmiBarcodeType.CODE128,
         textPosition: SunmiBarcodeTextPos.NO_TEXT,
         height: 80,
         width: 4);
     await SunmiPrinter.lineWrap(0);
     await SunmiPrinter.printText(
-      "Customer#  ${result[3].toString().trimLeft()}",
+      "Customer#  ${result[2].toString().trimLeft()}",
       style: SunmiStyle(
           align: SunmiPrintAlign.CENTER,
           bold: true,
           fontSize: SunmiFontSize.LG),
     );
+    await SunmiPrinter.bold();
     await SunmiPrinter.printRow(cols: [
       ColumnMaker(
         text: "Name ",
@@ -320,5 +321,6 @@ await custPrint(reportData);
     // await initialize();
     // await secondpart(reportData);
     await closePrinter();
+    
   }
 }

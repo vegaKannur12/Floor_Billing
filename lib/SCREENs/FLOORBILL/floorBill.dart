@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -112,13 +113,19 @@ class _FloorBillState extends State<FloorBill> {
                     ],
                   ),
                 ),
-                value.isSearch
+                value.fbListLoading
                     ? Expanded(
-                        child: FloorBillWidget(list: value.fbResulList),
-                      )
-                    : Expanded(
-                        child: FloorBillWidget(list: value.fbList),
-                      )
+                        child: SpinKitCircle(
+                        size: 50,
+                        color: Colors.blue,
+                      ))
+                    : value.isSearch ||value.fbListLoading
+                        ? Expanded(
+                            child: FloorBillWidget(list: value.fbResulList),
+                          )
+                        : Expanded(
+                            child: FloorBillWidget(list: value.fbList),
+                          )
                 //  Expanded(child: FloorBillWidget())
               ],
             );

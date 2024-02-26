@@ -92,244 +92,271 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
       body: Consumer<Controller>(
         builder: (context, value, child) => Padding(
           padding: const EdgeInsets.all(12),
-          child: SingleChildScrollView(
-            child: Column(children: [
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month,
-                      ),
-                      Text(
-                        date.toString(),
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              SizedBox(
-                height: 60,
-                child: TextFormField(
-                  ignorePointers: value.showadduser ? true : false,
-                  focusNode: cardfocus,
-                  controller: value.cardNoctrl,
-                  onChanged: (val) {},
-                  validator: (text) {
-                    if (text == null || text.isEmpty) {
-                      return 'Please Select Card Number';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                      errorBorder: UnderlineInputBorder(),
-                      suffixIcon: IconButton(
-                          icon: Icon(Icons.search),
-                          onPressed: () {
-                            scanBarcode("card");
-                          }),
-                      hintText: "Card Number"),
+          child: RefreshIndicator(
+            onRefresh: () {
+              return Future.delayed(Duration(seconds: 1), () {
+                Provider.of<Controller>(context, listen: false)
+                    .clearCardID("0");
+                Provider.of<Controller>(context, listen: false)
+                    .setcusnameAndPhone("", "", context);
+                value.userAddButtonDisable(false);
+                value.ccfon.clear();
+                value.ccname.clear();
+                value.card_id = "";
+                value.setaDDUserError("");
+              });
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(children: [
+                SizedBox(
+                  height: 10,
                 ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              SizedBox(
-                height: 55,
-                child: TextFormField(
-                  // ignorePointers: value.typlock?true:false,
-                  keyboardType: TextInputType.phone,
-                  controller: value.ccfon,
-                  onChanged: (val) {},
-                  decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(),
-                      errorBorder: UnderlineInputBorder(),
-                      prefixIcon: Icon(
-                        Icons.phone_android,
-                        color: Colors.blue,
-                      ),
-                      hintText: "Contact Number"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month,
+                        ),
+                        Text(
+                          date.toString(),
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              SizedBox(
-                height: 55,
-                child: TextFormField(
-                  // ignorePointers: value.typlock?true:false,
-                  controller: value.ccname,
-                  onChanged: (val) {},
-                  decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(),
-                      errorBorder: UnderlineInputBorder(),
-                      prefixIcon: Icon(
-                        Icons.person,
-                        color: Colors.blue,
-                      ),
-                      hintText: "Customer Name"),
+                const SizedBox(
+                  height: 15,
                 ),
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      if (value.ccname.text == "" || value.ccfon.text == "") {
-                        ep = "Please enter Name & Contact";
-                        value.setaDDUserError("Please enter Name & Contact");
-                        CustomSnackbar snackbar = CustomSnackbar();
-                        // ignore: use_build_context_synchronously
-                        snackbar.showSnackbar(
-                            context, "Please enter Name & Contact", "");
-                      } else if (value.ccfon.text.length != 10) {
-                        ep = 'Please Enter Valid Phone No ';
-                        value.setaDDUserError("Please Enter Valid Phone No");
-                        CustomSnackbar snackbar = CustomSnackbar();
-                        // ignore: use_build_context_synchronously
-                        snackbar.showSnackbar(
-                            context, "Please Enter Valid Phone No", "");
-                      } else {
-                        value.createFloorCardsNew(
-                            date, value.ccname.text, value.ccfon.text, context);
-                               
-                                printcust.add(value.ccname.text);
-                                printcust.add(value.ccfon.text);
-                                
-                                
-
-                        // value.ccname.clear();
-                        // value.ccfon.clear();
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Customer Added \n Want Print ?",
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                ],
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    textStyle:
-                                        Theme.of(context).textTheme.labelLarge,
-                                  ),
-                                  child: const Text('No'),
-                                  onPressed: () async {
-                                    Provider.of<Controller>(context,
-                                            listen: false)
-                                        .clearCardID("0");
-                                    Provider.of<Controller>(context,
-                                            listen: false)
-                                        .setcusnameAndPhone("", "", context);
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(context, '/mainpage');
-                                  },
-                                ),
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    textStyle:
-                                        Theme.of(context).textTheme.labelLarge,
-                                  ),
-                                  child: const Text('Yes'),
-                                  onPressed: () async {
-                                     printcust.add(value.card_id);
-                                print(printcust);
-                                    Provider.of<Controller>(context,
-                                            listen: false)
-                                        .clearCardID("0");
-                                    Provider.of<Controller>(context,
-                                            listen: false)
-                                        .setcusnameAndPhone("", "", context);
-                                     PrintReport printer = PrintReport();
-                                      printer.printReport(printcust,"cust");
-                                      Navigator.pop(context);
-                                      Navigator.pushNamed(
-                                          context, '/mainpage');
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                SizedBox(
+                  height: 60,
+                  child: TextFormField(
+                    ignorePointers: value.showadduser ? true : false,
+                    focusNode: cardfocus,
+                    controller: value.cardNoctrl,
+                    onChanged: (val) {},
+                    validator: (text) {
+                      if (text == null || text.isEmpty) {
+                        return 'Please Select Card Number';
                       }
+                      return null;
                     },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            "NEW",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                                color: Theme.of(context).secondaryHeaderColor),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Image.asset(
-                            "assets/name.png",
-                            color: Colors.black,
-                            height: 20,
-                            width: 20,
-                          ),
-                        ],
+                    decoration: InputDecoration(
+                        errorBorder: UnderlineInputBorder(),
+                        // suffixIcon: IconButton(
+                        //     icon: Icon(Icons.search),
+                        //     onPressed: () {
+                        //       scanBarcode("card");
+                        //     }),
+                        hintText: "Card Number"),
+                  ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                SizedBox(
+                  height: 55,
+                  child: TextFormField(
+                    // ignorePointers: value.typlock?true:false,
+                    keyboardType: TextInputType.phone,
+                    controller: value.ccfon,
+                    onChanged: (val) {},
+                    decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(),
+                        errorBorder: UnderlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.phone_android,
+                          color: Colors.blue,
+                        ),
+                        hintText: "Contact Number"),
+                  ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                SizedBox(
+                  height: 55,
+                  child: TextFormField(
+                    // ignorePointers: value.typlock?true:false,
+                    controller: value.ccname,
+                    onChanged: (val) {},
+                    decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(),
+                        errorBorder: UnderlineInputBorder(),
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Colors.blue,
+                        ),
+                        hintText: "Customer Name"),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (value.ccname.text == "" || value.ccfon.text == "") {
+                          ep = "Please enter Name & Contact";
+                          value.setaDDUserError("Please enter Name & Contact");
+                          CustomSnackbar snackbar = CustomSnackbar();
+                          // ignore: use_build_context_synchronously
+                          snackbar.showSnackbar(
+                              context, "Please enter Name & Contact", "");
+                        } else if (value.ccfon.text.length != 10) {
+                          ep = 'Please Enter Valid Phone No ';
+                          value.setaDDUserError("Please Enter Valid Phone No");
+                          CustomSnackbar snackbar = CustomSnackbar();
+                          // ignore: use_build_context_synchronously
+                          snackbar.showSnackbar(
+                              context, "Please Enter Valid Phone No", "");
+                        } else {
+                          WidgetsBinding.instance
+                              .addPostFrameCallback((_) async {
+                            String nme = value.ccname.text;
+                            String phe = value.ccfon.text;
+                            await value.getCustData(
+                                date, value.cardNoctrl.text, context);
+                            if (value.custDetailsList.isEmpty &&
+                                value.custDetailsList.length == 0) {
+                              // value.card_id = value.cardNoctrl.text;
+                              // await value.setcusnameAndPhone(
+                              //     value.ccname.text, value.ccfon.text, context);
+                              await value.createFloorCardsNew(
+                                  date, nme, phe, context);
+
+                              // printcust.add(nme);
+                              // printcust.add(phe);
+                              // printcust.add(value.cardNoctrl.text);
+                              print("SAved");
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Customer Already Exists",
+                                          style: TextStyle(fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          textStyle: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
+                                        ),
+                                        child: const Text('Ok'),
+                                        onPressed: () async {
+                                          // Provider.of<Controller>(context,
+                                          //         listen: false)
+                                          //     .clearCardID("0");
+                                          // Provider.of<Controller>(context,
+                                          //         listen: false)
+                                          //     .setcusnameAndPhone("", "", context);
+                                          Navigator.pop(context);
+                                          // Navigator.pushNamed(context, '/mainpage');
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          }); // );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              "NEW",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  color:
+                                      Theme.of(context).secondaryHeaderColor),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Image.asset(
+                              "assets/name.png",
+                              color: Colors.black,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      
- value.userAddButtonDisable(false);
-                          value.ccfon.clear();
-                          value.ccname.clear();
-                          value.card_id = "";
-                          value.setaDDUserError("");
-                    },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Refresh",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                                color: Theme.of(context).secondaryHeaderColor),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Icon(Icons.refresh)
-                        ],
+                    ElevatedButton(
+                      onPressed: () async {
+                        // printcust.add(value.card_id);
+                        String nme = value.ccname.text;
+                        String phe = value.ccfon.text;
+                        printcust.add(nme);
+                        printcust.add(phe);
+                        printcust.add(value.cardNoctrl.text);
+                        print(printcust);
+                        Provider.of<Controller>(context, listen: false)
+                            .clearCardID("0");
+                        Provider.of<Controller>(context, listen: false)
+                            .setcusnameAndPhone("", "", context);
+                        PrintReport printer = PrintReport();
+                        await printer.printReport(printcust, "cust");
+                        // value.userAddButtonDisable(false);
+                        print("Printed");
+                        value.ccfon.clear();
+                        value.ccname.clear();
+                        value.card_id = "";
+                        value.setaDDUserError("");
+                        printcust.clear();
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              "PRINT",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                  color:
+                                      Theme.of(context).secondaryHeaderColor),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Image.asset(
+                              "assets/print.png",
+                              color: Colors.black,
+                              height: 20,
+                              width: 20,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              )
-            ]),
+                  ],
+                )
+              ]),
+            ),
           ),
         ),
       ),
