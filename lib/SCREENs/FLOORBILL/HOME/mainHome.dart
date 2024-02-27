@@ -140,7 +140,7 @@ class _MainHomeState extends State<MainHome> {
                           );
                         } else if (index == 2) {
                           Provider.of<Controller>(context, listen: false)
-                              .getDELList(0, context);
+                              .getDELList("0", context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(

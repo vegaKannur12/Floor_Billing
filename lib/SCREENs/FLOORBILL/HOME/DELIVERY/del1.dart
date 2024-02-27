@@ -36,7 +36,7 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
       appBar: AppBar(
         toolbarHeight: 60,
         backgroundColor: Color.fromARGB(255, 220, 228, 111),
-        title: Text("DELIVERY BILL"),
+        title: Text("DELIVERY"),
       ),
       body: Consumer<Controller>(
         builder: (context, value, child) => Column(
@@ -54,7 +54,7 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
                       //   decoration: const InputDecoration(,
                       onFieldSubmitted: (_) {
                         Provider.of<Controller>(context, listen: false)
-                            .getDELList(int.parse(seacrh.text), context);
+                            .getDELList(seacrh.text, context);
                         // Provider.of<Controller>(context, listen: false)
                         //     .searchDelevery(val);
                         setState(() {});
@@ -76,7 +76,8 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
                           onPressed: () {
                             seacrh.clear();
                             Provider.of<Controller>(context, listen: false)
-                                .getDELList(0, context);
+                                .getDELList("0", context);
+                            setState(() {});
                           },
                         ),
                         contentPadding:
@@ -98,7 +99,7 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
                         ),
                         // filled: true,
                         hintStyle: TextStyle(color: Colors.black, fontSize: 13),
-                        hintText: "Search Card Number",
+                        hintText: "Search Delevery Bill",
                         // fillColor: Colors.grey[100]
                       ),
                     ),
@@ -181,7 +182,7 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
           seacrh.text = _scanBarcode.toString();
           _scanBarcode = "";
           Provider.of<Controller>(context, listen: false)
-              .getDELList(int.parse(seacrh.text), context);
+              .getDELList(seacrh.text, context);
 
           setState(() {});
         }

@@ -137,7 +137,7 @@ class Controller extends ChangeNotifier {
   bool itemloading = false;
   bool cartloading = false;
   bool fbListLoading = false;
-  bool delListLoading= false;
+  bool delListLoading = false;
   // Future<void> sendHeartbeat() async {
   //   try {
   //     if (SqlConn.isConnected) {
@@ -552,7 +552,7 @@ class Controller extends ChangeNotifier {
       // SqlConn.disconnect();
       if (map.isEmpty && bagNo.isNotEmpty) {
         if (from == "home") {
-          setbagerror("Invalid");
+          setbagerror("Not Available");
         } else {
           showDialog(
             context: context,
@@ -2152,23 +2152,22 @@ class Controller extends ChangeNotifier {
     }
   }
 
-  getDELList(int b_no, BuildContext context) async {
+  getDELList(String b_no, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? os = await prefs.getString("os");
     int car;
     card_id == "" ? car = 0 : car = int.parse(card_id);
-
+    delListLoading = true;
+    deliveryBillList.clear();
+    sortedDelvryList.clear();
+    delList.clear();
+    notifyListeners();
     print("tabl para---------$os----$b_no");
     try {
-       delListLoading=true;
-       deliveryBillList.clear();
-       sortedDelvryList.clear();
-       delList.clear();
-       notifyListeners();
-      var res =
-          await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
+      var res = await SqlConn.readData(
+          "Flt_Sp_BillList_For_Delivery_SearchAll '$os','$b_no'");
       var map = jsonDecode(res);
-     
+
       if (map != null) {
         for (var item in map) {
           delList.add(item);
@@ -2177,10 +2176,11 @@ class Controller extends ChangeNotifier {
         for (var item in deliveryBillList) {
           int fbNo = item['Bill_No'];
 
-          if (!sortedDelvryList.containsKey(fbNo)) {
-            sortedDelvryList[fbNo] = [];
+          if (sortedDelvryList.containsKey(fbNo)) {
+            sortedDelvryList[fbNo]!.add(item);
+          } else {
+            sortedDelvryList[fbNo] = [item];
           }
-          sortedDelvryList[fbNo]!.add(item);
         }
         notifyListeners();
 
@@ -2188,6 +2188,7 @@ class Controller extends ChangeNotifier {
         // isDelSearch = false;
       }
       print("delList-----$res");
+      print("deliveryBillList-----$deliveryBillList");
       print("sorted====>$sortedDelvryList");
       // Map so = {
       //   1237: [
@@ -2303,9 +2304,53 @@ class Controller extends ChangeNotifier {
       //     },
       //   ],
       // };
+      Map so = {
+        123761: [
+          {
+            'Bill_No': 123761,
+            'Bill_Date': '2024-02-27 00:00:00.0',
+            'Amount': 3297.0,
+            'CardID': 4998,
+            'CardNo': 1002,
+            'Cust_Name': 'test',
+            'Cust_Phone': 1234567890,
+            'Slots': 'A1',
+            'Fb': '30, 47, 48',
+            'Paid': 1
+          },
+          {
+            'Bill_No': 123761,
+            'Bill_Date': '2024-02-27 00:00:00.0',
+            'Amount': 3297.0,
+            'CardID': 4998,
+            'CardNo': 1006,
+            'Cust_Name': 'test',
+            'Cust_Phone': 1234567890,
+            'Slots': 'A1',
+            'Fb': '30, 47, 48',
+            'Paid': 1
+          }
+        ],
+        12376: [
+          {
+            'Bill_No': 12376,
+            'Bill_Date': '2024-02-27 00:00:00.0',
+            'Amount': 3297.0,
+            'CardID': 4998,
+            'CardNo': 1002,
+            'Cust_Name': 'test',
+            'Cust_Phone': 1234567890,
+            'Slots': 'A1',
+            'Fb': '30, 47, 48',
+            'Paid': 1
+          }
+        ]
+      };
+      // getDelwidget(so, context);
       getDelwidget(sortedDelvryList, context);
       // getDelwidget(so, context);
-      delListLoading=false;
+      delListLoading = false;
+
       notifyListeners();
     }
     // on PlatformException catch (e) {
@@ -2407,7 +2452,10 @@ class Controller extends ChangeNotifier {
 
   getDelwidget(Map sorted, BuildContext context) {
     print("====fhhhhhhhh");
-
+    List<Map<String, dynamic>> billDetails = [];
+    int billNo = 0;
+    delWidget.clear();
+    notifyListeners();
     delWidget.add(ListView.builder(
         shrinkWrap: true,
         physics: ClampingScrollPhysics(),
@@ -2415,55 +2463,68 @@ class Controller extends ChangeNotifier {
         // shrinkWrap: true, physics: ScrollPhysics(),scrollDirection: Axis.vertical,
         itemCount: sorted.keys.length,
         itemBuilder: (context, index) {
-          final billNo = sorted.keys.elementAt(index);
-          List<Map<String, dynamic>> billDetails = sorted[billNo]!;
+          billNo = sorted.keys.elementAt(index);
+          print("bill==$billNo");
+          billDetails = sorted[billNo]!;
+          print("billdata==${sorted[billNo]}");
           double amt = billDetails[0]['Amount'];
-          return Column(mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          String fb = billDetails[0]['Fb'].toString().trimLeft();
+          String slt = billDetails[0]['Slots'].toString().trimLeft();
+
+          return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Container(
+                margin: EdgeInsets.only(left: 10, right: 10),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.black45)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Bill No# $billNo',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    Container(
+                      color: Color.fromARGB(255, 174, 198, 238),
+                      height: 35,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            ' Bill No# $billNo',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Text(
+                            "${amt.toStringAsFixed(2)} \u20B9 ",
+                            // widget.slotname,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          )
+                        ],
                       ),
                     ),
-                    Text(
-                      "${amt.toStringAsFixed(2)} \u20B9 ",
-                      // widget.slotname,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    )
-                  ],
-                ),
-              ),
-              ListView.builder(
-                 shrinkWrap: true,
-        physics: ClampingScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: billDetails.length,
-                itemBuilder: (context, index) {
-                  Map details = billDetails[index];
-                  return Container(
-                    height: 40,
-                    child: ListTile(
-                      subtitle: Column(
-                        children: [
-                          // Text('Slot Name: ${details['Slot_Name']}'),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: billDetails.length,
+                      itemBuilder: (context, index) {
+                        Map details = billDetails[index];
+                        return Container(
+                          padding: EdgeInsets.only(left: 8, right: 8),
+                          height: 40,
+                          child: Column(
                             children: [
+                              SizedBox(
+                                height: 5,
+                              ),
                               Row(
                                 children: [
                                   Image.asset(
                                     "assets/card.png",
-                                    height: 20,
-                                    width: 20,
+                                    height: 27,
+                                    width: 27,
                                   ),
                                   SizedBox(
                                     width: 5,
@@ -2471,76 +2532,118 @@ class Controller extends ChangeNotifier {
                                   Text(
                                     details['CardNo'].toString().trimLeft(),
                                     // widget.slotname,
-                                    style: TextStyle(fontSize: 18),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                width: 30,
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    "assets/bagimg.png",
-                                    color: Color.fromARGB(255, 61, 131, 63),
-                                    height: 27,
-                                    width: 27,
-                                  ),
-                                  Text(
-                                    details['Slot_Name'].toString().trimLeft(),
                                     style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w500),
+                                  ),
+                                  Text(" - "),
+                                  Row(
+                                    children: [
+                                     
+                                      Text("${details['Cust_Phone']
+                                          .toString()
+                                          .trimLeft()} / "),
+                                           Text(
+                                          "${details['Cust_Name'].toString().trimLeft()}",),
+                                    ],
                                   )
                                 ],
                               ),
-                              Text("FB# ${details['Fb_No'].toString()}",
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500))
+                            ],
+                          ),
+                          // Add more details to display if needed
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 8, right: 8),
+                      child: Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Image.asset(
+                                "assets/bagimg.png",
+                                color: Color.fromARGB(255, 61, 131, 63),
+                                height: 27,
+                                width: 27,
+                              ),
+                              Text(
+                                 " ${slt.toString()}",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w500),overflow: TextOverflow.ellipsis
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Image.asset(
+                                "assets/floor.png",
+                                height: 27,
+                                width: 27,
+                              ),
+                              Text(
+                                 " ${fb.toString()}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,overflow: TextOverflow.ellipsis
+                                ),
+                              ),
                             ],
                           ),
                         ],
                       ),
-                      // Add more details to display if needed
                     ),
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      height: 35,
-                      width: 100,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          getDelivery(billNo, context);
-                          Provider.of<Controller>(context, listen: false)
-                              .getDELList(0, context);
-                          CustomSnackbar snackbar = CustomSnackbar();
-                          snackbar.showSnackbar(
-                              context, "Item Delevered...", "");
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent),
-                        child: Text(
-                          "DELIVER",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                              color: Theme.of(context).secondaryHeaderColor),
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 35,
+                            width: 100,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                getDelivery(billNo, context);
+                                Provider.of<Controller>(context, listen: false)
+                                    .getDELList("0", context);
+                                CustomSnackbar snackbar = CustomSnackbar();
+                                snackbar.showSnackbar(
+                                    context, "Item Delevered...", "");
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color.fromARGB(255, 189, 104, 104)),
+                              child: Text(
+                                "DELIVER",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                          )
+                        ],
                       ),
+                    ),
+                    SizedBox(
+                      height: 5,
                     )
                   ],
                 ),
+              ),
+              SizedBox(
+                height: 10,
               )
             ],
           );
         }));
+
+    notifyListeners();
   }
 
 /////////////////////////////////////

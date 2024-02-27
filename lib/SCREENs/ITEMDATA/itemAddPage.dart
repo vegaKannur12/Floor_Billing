@@ -87,6 +87,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
               child: const Text('Yes'),
               onPressed: () {
                 Provider.of<Controller>(context, listen: false).clearunsaved();
+                Navigator.pop(context);
                 Navigator.pushNamed(context, '/floorhome');
                 // Navigator.pop(context);
                 // Navigator.pop(context);
