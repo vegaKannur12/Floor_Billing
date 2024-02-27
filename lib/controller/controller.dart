@@ -136,7 +136,8 @@ class Controller extends ChangeNotifier {
   bool igno = false;
   bool itemloading = false;
   bool cartloading = false;
-  bool fbListLoading=false;
+  bool fbListLoading = false;
+  bool delListLoading= false;
   // Future<void> sendHeartbeat() async {
   //   try {
   //     if (SqlConn.isConnected) {
@@ -1637,7 +1638,7 @@ class Controller extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     os = await prefs.getString("os");
-print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
+    print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
     try {
       var res = await SqlConn.readData(
           "Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
@@ -1934,11 +1935,11 @@ print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
       'os ----- $os, cardId ------->$card_id, cart No----------$cart_id',
     );
     // await initYearsDb(context, "");
-    
+
     unsavedList.clear();
     notifyListeners();
     try {
-       cartloading = true;
+      cartloading = true;
       notifyListeners();
       var res = await SqlConn.readData(
           "Flt_Sp_Get_Unsaved_FBCart '$cart_id','$card_id','$os'");
@@ -1949,7 +1950,7 @@ print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
       for (var item in map) {
         unsavedList.add(item);
       }
-     
+
       notifyListeners();
       qty =
           List.generate(unsavedList.length, (index) => TextEditingController());
@@ -1966,8 +1967,8 @@ print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
         print('unsaved total :$unsaved_tot');
         notifyListeners();
       }
-       cartloading = false;
-     
+      cartloading = false;
+
       notifyListeners();
     }
     // on PlatformException catch (e) {
@@ -2071,8 +2072,9 @@ print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
     card_id == "" ? car = 0 : car = int.parse(card_id);
 
     print("tabl para------$date----$os----$car");
-    try {fbListLoading=true;
-    notifyListeners();
+    try {
+      fbListLoading = true;
+      notifyListeners();
       var res = await SqlConn.readData("Flt_Sp_Get_Fb_List '$date',$car,'$os'");
       var map = jsonDecode(res);
       fbList.clear();
@@ -2084,72 +2086,70 @@ print("Flt_Sp_Create_Floor_Cards_As_Customer '$os','$ph','$cn'");
         isSearch = false;
       }
       print("fbList-----$res");
-fbListLoading=false;
- 
+      fbListLoading = false;
+
       notifyListeners();
-    } 
-   
-     catch (e) {
+    } catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
     if (SqlConn.isConnected == false) {
-        print("hi");
-        //   // SharedPreferences prefs = await SharedPreferences.getInstance();
-        //   // String? os = prefs.getString("os");
-        //   // String? cn = prefs.getString("cname");
-        //   // if (incorect) {
-        //   //   CustomSnackbar snackbar = CustomSnackbar();
-        //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
-        //   //   //  Navigator.pop(context);
-        //   //   exit(0);
-        //   // } else {
-        //   //   Navigator.push(
-        //   //     context,
-        //   //     MaterialPageRoute(builder: (context) => MainHome()),
-        //   //   );
-        //   // }
-        //   // If connected, do not pop context as it may dismiss the error dialog
+      print("hi");
+      //   // SharedPreferences prefs = await SharedPreferences.getInstance();
+      //   // String? os = prefs.getString("os");
+      //   // String? cn = prefs.getString("cname");
+      //   // if (incorect) {
+      //   //   CustomSnackbar snackbar = CustomSnackbar();
+      //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+      //   //   //  Navigator.pop(context);
+      //   //   exit(0);
+      //   // } else {
+      //   //   Navigator.push(
+      //   //     context,
+      //   //     MaterialPageRoute(builder: (context) => MainHome()),
+      //   //   );
+      //   // }
+      //   // If connected, do not pop context as it may dismiss the error dialog
 
-        //   // Navigator.push(
-        //   //   context,
-        //   //   MaterialPageRoute(builder: (context) => MainHome()),
-        //   // );
+      //   // Navigator.push(
+      //   //   context,
+      //   //   MaterialPageRoute(builder: (context) => MainHome()),
+      //   // );
 
-        //   debugPrint("Database connected, not popping context.");
-        // }
-        //  else {
-        // If not connected, pop context to dismiss the dialog
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Not Connected.!",
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  SpinKitCircle(
-                    color: Colors.green,
-                  )
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    await initYearsDb(context, "");
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Connect'),
+      //   debugPrint("Database connected, not popping context.");
+      // }
+      //  else {
+      // If not connected, pop context to dismiss the dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Not Connected.!",
+                  style: TextStyle(fontSize: 13),
                 ),
+                SpinKitCircle(
+                  color: Colors.green,
+                )
               ],
-            );
-          },
-        );
-        debugPrint("Database not connected, popping context.");
-      }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await initYearsDb(context, "");
+                  Navigator.of(context).pop();
+                },
+                child: Text('Connect'),
+              ),
+            ],
+          );
+        },
+      );
+      debugPrint("Database not connected, popping context.");
+    }
   }
 
   getDELList(int b_no, BuildContext context) async {
@@ -2160,12 +2160,15 @@ fbListLoading=false;
 
     print("tabl para---------$os----$b_no");
     try {
+       delListLoading=true;
+       deliveryBillList.clear();
+       sortedDelvryList.clear();
+       delList.clear();
+       notifyListeners();
       var res =
           await SqlConn.readData("Flt_Sp_BillList_For_Delivery '$os',$b_no");
       var map = jsonDecode(res);
-      deliveryBillList.clear();
-      sortedDelvryList.clear();
-      delList.clear();
+     
       if (map != null) {
         for (var item in map) {
           delList.add(item);
@@ -2186,124 +2189,125 @@ fbListLoading=false;
       }
       print("delList-----$res");
       print("sorted====>$sortedDelvryList");
-      Map so = {
-        1237: [
-          {
-            'Bill_No': 1237,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 1237,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-        123757: [
-          {
-            'Bill_No': 123757,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 123757,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-        34566: [
-          {
-            'Bill_No': 34566,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 34566,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-        99999: [
-          {
-            'Bill_No': 99999,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 21,
-            'Slot_ID': 19,
-            'Slot_Name': 'D1',
-            'Paid': 1,
-          },
-          {
-            'Bill_No': 99999,
-            'Bill_Date': '2024-02-23 00:00:00.0',
-            'Amount': 12886.0,
-            'CardID': 5007,
-            'CardNo': 'HJ004',
-            'Cust_Name': 'dhanush',
-            'Cust_Phone': 9544533972,
-            'Fb_No': 20,
-            'Slot_ID': 20,
-            'Slot_Name': 'D2',
-            'Paid': 1,
-          },
-        ],
-      };
-      // getDelwidget(sortedDelvryList, context);
-      getDelwidget(so, context);
+      // Map so = {
+      //   1237: [
+      //     {
+      //       'Bill_No': 1237,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 13886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 1237,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 13886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      //   123757: [
+      //     {
+      //       'Bill_No': 123757,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 123757,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      //   34566: [
+      //     {
+      //       'Bill_No': 34566,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 1280.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 34566,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 1280.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      //   99999: [
+      //     {
+      //       'Bill_No': 99999,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 21,
+      //       'Slot_ID': 19,
+      //       'Slot_Name': 'D1',
+      //       'Paid': 1,
+      //     },
+      //     {
+      //       'Bill_No': 99999,
+      //       'Bill_Date': '2024-02-23 00:00:00.0',
+      //       'Amount': 12886.0,
+      //       'CardID': 5007,
+      //       'CardNo': 'HJ004',
+      //       'Cust_Name': 'dhanush',
+      //       'Cust_Phone': 9544533972,
+      //       'Fb_No': 20,
+      //       'Slot_ID': 20,
+      //       'Slot_Name': 'D2',
+      //       'Paid': 1,
+      //     },
+      //   ],
+      // };
+      getDelwidget(sortedDelvryList, context);
+      // getDelwidget(so, context);
+      delListLoading=false;
       notifyListeners();
-    } 
+    }
     // on PlatformException catch (e) {
     //   print("PlatformException occurredcttr: $e");
     //   SqlConn.disconnect();
@@ -2337,68 +2341,68 @@ fbListLoading=false;
     //   );
     //   print(e);
     //   return null;
-    // } 
+    // }
     catch (e) {
       print("An unexpected error occurred: $e");
       // Handle other types of exceptions
     }
     if (SqlConn.isConnected == false) {
-        print("hi");
-        //   // SharedPreferences prefs = await SharedPreferences.getInstance();
-        //   // String? os = prefs.getString("os");
-        //   // String? cn = prefs.getString("cname");
-        //   // if (incorect) {
-        //   //   CustomSnackbar snackbar = CustomSnackbar();
-        //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
-        //   //   //  Navigator.pop(context);
-        //   //   exit(0);
-        //   // } else {
-        //   //   Navigator.push(
-        //   //     context,
-        //   //     MaterialPageRoute(builder: (context) => MainHome()),
-        //   //   );
-        //   // }
-        //   // If connected, do not pop context as it may dismiss the error dialog
+      print("hi");
+      //   // SharedPreferences prefs = await SharedPreferences.getInstance();
+      //   // String? os = prefs.getString("os");
+      //   // String? cn = prefs.getString("cname");
+      //   // if (incorect) {
+      //   //   CustomSnackbar snackbar = CustomSnackbar();
+      //   //   snackbar.showSnackbar(context, "Incorrect Username or Password", "");
+      //   //   //  Navigator.pop(context);
+      //   //   exit(0);
+      //   // } else {
+      //   //   Navigator.push(
+      //   //     context,
+      //   //     MaterialPageRoute(builder: (context) => MainHome()),
+      //   //   );
+      //   // }
+      //   // If connected, do not pop context as it may dismiss the error dialog
 
-        //   // Navigator.push(
-        //   //   context,
-        //   //   MaterialPageRoute(builder: (context) => MainHome()),
-        //   // );
+      //   // Navigator.push(
+      //   //   context,
+      //   //   MaterialPageRoute(builder: (context) => MainHome()),
+      //   // );
 
-        //   debugPrint("Database connected, not popping context.");
-        // }
-        //  else {
-        // If not connected, pop context to dismiss the dialog
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Not Connected.!",
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  SpinKitCircle(
-                    color: Colors.green,
-                  )
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    await initYearsDb(context, "");
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Connect'),
+      //   debugPrint("Database connected, not popping context.");
+      // }
+      //  else {
+      // If not connected, pop context to dismiss the dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Not Connected.!",
+                  style: TextStyle(fontSize: 13),
                 ),
+                SpinKitCircle(
+                  color: Colors.green,
+                )
               ],
-            );
-          },
-        );
-        debugPrint("Database not connected, popping context.");
-      }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await initYearsDb(context, "");
+                  Navigator.of(context).pop();
+                },
+                child: Text('Connect'),
+              ),
+            ],
+          );
+        },
+      );
+      debugPrint("Database not connected, popping context.");
+    }
   }
 
   getDelwidget(Map sorted, BuildContext context) {
@@ -2406,14 +2410,15 @@ fbListLoading=false;
 
     delWidget.add(ListView.builder(
         shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
         //             scrollDirection: Axis.vertical,
         // shrinkWrap: true, physics: ScrollPhysics(),scrollDirection: Axis.vertical,
         itemCount: sorted.keys.length,
         itemBuilder: (context, index) {
           final billNo = sorted.keys.elementAt(index);
           List<Map<String, dynamic>> billDetails = sorted[billNo]!;
-          // double amt = billDetails[index]['Amount'];
-          return Column(
+          double amt = billDetails[0]['Amount'];
+          return Column(mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -2428,18 +2433,18 @@ fbListLoading=false;
                         fontSize: 18,
                       ),
                     ),
-                    // Text(
-                    //   "${amt.toStringAsFixed(2)} \u20B9 ",
-                    //   // widget.slotname,
-                    //   style:
-                    //       TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    // )
+                    Text(
+                      "${amt.toStringAsFixed(2)} \u20B9 ",
+                      // widget.slotname,
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    )
                   ],
                 ),
               ),
               ListView.builder(
-                shrinkWrap: true,
-                 physics: NeverScrollableScrollPhysics(),
+                 shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 itemCount: billDetails.length,
                 itemBuilder: (context, index) {
@@ -2694,7 +2699,7 @@ fbListLoading=false;
 
     if (key != null) {
       isSearch = true;
-      fbListLoading=true;
+      fbListLoading = true;
       notifyListeners();
       fbResulList = fbList
           .where((e) => e["CardNo"]
@@ -2705,12 +2710,9 @@ fbListLoading=false;
           .toList();
 
       print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy$fbResulList");
-fbListLoading=false;
+      fbListLoading = false;
       notifyListeners();
-    } 
-    else 
-    {
-
+    } else {
       isSearch = false;
       fbResulList = fbList;
 

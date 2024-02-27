@@ -73,7 +73,7 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { Size size = MediaQuery.of(context).size;
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -131,28 +131,45 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
                 const SizedBox(
                   height: 15,
                 ),
-                SizedBox(
-                  height: 60,
-                  child: TextFormField(
-                    ignorePointers: value.showadduser ? true : false,
-                    focusNode: cardfocus,
-                    controller: value.cardNoctrl,
-                    onChanged: (val) {},
-                    validator: (text) {
-                      if (text == null || text.isEmpty) {
-                        return 'Please Select Card Number';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                        errorBorder: UnderlineInputBorder(),
-                        // suffixIcon: IconButton(
-                        //     icon: Icon(Icons.search),
-                        //     onPressed: () {
-                        //       scanBarcode("card");
-                        //     }),
-                        hintText: "Card Number"),
-                  ),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 60, width: size.width / 1.3,
+                      child: TextFormField(
+                        ignorePointers: value.showadduser ? true : false,
+                        focusNode: cardfocus,
+                        controller: value.cardNoctrl,
+                        onChanged: (val) {},
+                        validator: (text) {
+                          if (text == null || text.isEmpty) {
+                            return 'Please Select Card Number';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                            errorBorder: UnderlineInputBorder(),
+                            // suffixIcon: IconButton(
+                            //     icon: Icon(Icons.search),
+                            //     onPressed: () {
+                            //       scanBarcode("card");
+                            //     }),
+                            hintText: "Card Number"),
+                      ),
+                    ),
+                     SizedBox(
+                          width: 5,
+                        ),
+                        IconButton(
+                          icon: Image.asset(
+                            "assets/barscan.png",
+                            height: 40,
+                            width: 30,
+                          ),
+                          onPressed: () {
+                            scanBarcode("card");
+                          },
+                        ),
+                  ],
                 ),
                 const SizedBox(
                   height: 15,
@@ -373,14 +390,19 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
         // if (field == "card") {
         Provider.of<Controller>(context, listen: false).cardNoctrl.text =
             _scanBarcode.toString();
-        _scanBarcode = "";
-        Provider.of<Controller>(context, listen: false).getCustData(
-            date,
             Provider.of<Controller>(context, listen: false)
+        .getCustData(date, Provider.of<Controller>(context, listen: false)
                 .cardNoctrl
                 .text
-                .toString(),
-            context);
+                .toString(), context);
+        _scanBarcode = "";
+        // Provider.of<Controller>(context, listen: false).getCustData(
+        //     date,
+        //     Provider.of<Controller>(context, listen: false)
+        //         .cardNoctrl
+        //         .text
+        //         .toString(),
+        //     context);
         // }
         // else {
         //   bagno.text = _scanBarcode.toString();
@@ -389,8 +411,9 @@ class _ADDCUSTOMERState extends State<ADDCUSTOMER> {
         //       .getBagDetails(bagno.text.toString(), context, "home");
         // }
       });
-    } on PlatformException {
-      _scanBarcode = "hugugu";
+    } 
+    on PlatformException {
+      _scanBarcode = "";
     }
   }
 }

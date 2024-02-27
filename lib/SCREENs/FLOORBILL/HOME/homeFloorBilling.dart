@@ -394,6 +394,7 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           height: 45,
                           width: size.width / 1.3,
                           child: TextFormField(
+                            autofocus: true,
                             ignorePointers: value.showadduser ? true : false,
                             focusNode: cardfocus,
                             controller: value.cardNoctrl,
@@ -601,6 +602,8 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                           child: TextFormField(
                             ignorePointers: value.igno ? true : false,
                             focusNode: bagFocus,
+                            autofocus:
+                                value.cardNoctrl.text.isNotEmpty ? true : false,
                             controller: bagno,
                             onFieldSubmitted: (_) {
                               Provider.of<Controller>(context, listen: false)
@@ -623,19 +626,19 @@ class _HomeFloorBillState extends State<HomeFloorBill> {
                                 hintText: "Bag/Slot Number"),
                           ),
                         ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        IconButton(
-                          icon: Image.asset(
-                            "assets/barscan.png",
-                            height: 40,
-                            width: 30,
-                          ),
-                          onPressed: () {
-                            scanBarcode("bag");
-                          },
-                        ),
+                        // SizedBox(
+                        //   width: 5,
+                        // ),
+                        // IconButton(
+                        //   icon: Image.asset(
+                        //     "assets/barscan.png",
+                        //     height: 40,
+                        //     width: 30,
+                        //   ),
+                        //   onPressed: () {
+                        //     scanBarcode("bag");
+                        //   },
+                        // ),
                       ],
                     ),
                     Row(

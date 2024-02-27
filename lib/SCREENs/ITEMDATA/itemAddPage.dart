@@ -306,7 +306,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               child: GestureDetector(
                                 child: TextFormField(
                                     // focusNode: barfocus,
-                                    controller: itembarcodctrl,
+                                    controller: itembarcodctrl,autofocus: true,
                                     onChanged: (val) {
                                       // _debouncer.run(() {
                                       //   Provider.of<Controller>(context,
@@ -360,7 +360,7 @@ class _ItemAddPageState extends State<ItemAddPage> {
                               ),
                             ),
                             SizedBox(
-                              width: 5,
+                              width: 15,
                             ),
                             IconButton(
                               icon: Image.asset(

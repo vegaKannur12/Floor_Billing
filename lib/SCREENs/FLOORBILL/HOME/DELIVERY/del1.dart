@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class FirstDeleveryBill extends StatefulWidget {
@@ -37,8 +39,8 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
         title: Text("DELIVERY BILL"),
       ),
       body: Consumer<Controller>(
-        builder: (context, value, child) => 
-        Column(
+        builder: (context, value, child) => Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.all(10),
@@ -117,24 +119,42 @@ class _FirstDeleveryBillState extends State<FirstDeleveryBill> {
                 ],
               ),
             ),
-      
+
             //  value.isDelSearch
             //           ? Expanded(
             //               child: DeliveryBillWid(list: value.delResulList),
             //             )
             //           :
-      
-            Expanded(
-              child: ListView.builder(
-                //  shrinkWrap: true,
-                //   scrollDirection: Axis.vertical,
-                //  physics: NeverScrollableScrollPhysics(),
-                  itemCount: value.delWidget.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return value.delWidget[index];
-                  }),
-            )
-      
+            value.delListLoading
+                ? Expanded(
+                    child: SpinKitCircle(
+                    size: 50,
+                    color: Colors.blue,
+                  ))
+                : value.sortedDelvryList.isEmpty
+                    ? Expanded(
+                        child: Container(
+                            height: size.height * 0.8,
+                            child: Center(
+                                child: LottieBuilder.asset(
+                              "assets/noData.json",
+                              height: size.height * 0.24,
+                            ))))
+                    : Expanded(
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            //   scrollDirection: Axis.vertical,
+                            //  physics: NeverScrollableScrollPhysics(),
+                            itemCount: value.delWidget.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Column(
+                                children: [
+                                  value.delWidget[index],
+                                ],
+                              );
+                            }),
+                      )
+
             // Expanded(child: DeliveryBillWidget(dellist: value.resultList)),
             // value.isSearch
             //         ? Expanded(
